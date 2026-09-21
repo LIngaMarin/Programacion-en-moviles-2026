@@ -20,6 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 data class Producto(
     val nombre: String,
@@ -33,6 +38,9 @@ fun PantallaCarrito() {
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     val productos = remember { mutableStateListOf<Producto>() }
+    val subtotal = productos.sumOf { it.precio * it.cantidad }
+    val igv = subtotal * 0.18
+    val total = subtotal + igv
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Mi Carrito TECSUP", style = MaterialTheme.typography.headlineSmall)
@@ -54,12 +62,37 @@ fun PantallaCarrito() {
             modifier = Modifier.fillMaxWidth()
         ) { Text("AGREGAR") }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(productos) { producto ->
-                TarjetaProducto(producto = producto, onEliminar = { productos.remove(producto) })
+        if (productos.isEmpty()) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Tu carrito está vacío", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+                    Text("Agrega tu primer producto", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(productos) { producto ->
+                    TarjetaProducto(producto = producto, onEliminar = { productos.remove(producto) })
+                }
+            }
+        }
+
+        Surface(color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Productos: ${productos.size}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Subtotal"); Text("S/ ${"%.2f".format(subtotal)}")
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("IGV (18%)"); Text("S/ ${"%.2f".format(igv)}")
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("TOTAL", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text("S/ ${"%.2f".format(total)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                }
             }
         }
     }
