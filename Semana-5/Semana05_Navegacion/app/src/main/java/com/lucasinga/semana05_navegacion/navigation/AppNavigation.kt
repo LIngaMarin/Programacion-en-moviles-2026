@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.lucasinga.semana05_navegacion.screens.DetailScreen
 import com.lucasinga.semana05_navegacion.screens.HomeScreen
 import com.lucasinga.semana05_navegacion.screens.ListScreen
+import com.lucasinga.semana05_navegacion.screens.LoginScreen
 import com.lucasinga.semana05_navegacion.screens.ProfileScreen
 
 @Composable
@@ -17,8 +18,11 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
     ) {
+        composable(Screen.Login.route) {
+            LoginScreen(navController)
+        }
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
@@ -28,7 +32,6 @@ fun AppNavigation() {
         composable(Screen.Profile.route) {
             ProfileScreen(navController)
         }
-        // ruta con argumento tipado Int
         composable(
             route = Screen.Detail.route,
             arguments = listOf(
