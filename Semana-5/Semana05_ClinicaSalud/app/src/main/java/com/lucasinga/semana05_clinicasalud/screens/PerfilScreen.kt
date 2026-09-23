@@ -27,6 +27,7 @@ fun PerfilScreen(citas: List<Cita>, onMenuClick: () -> Unit) {
     // estadísticas calculadas con la misma lista de citas
     val confirmadas = citas.count { it.estado == "Confirmada" }
     val completadas = citas.count { it.estado == "Completada" }
+    val canceladas = citas.count { it.estado == "Cancelada" }
 
     Scaffold(
         topBar = {
@@ -64,6 +65,7 @@ fun PerfilScreen(citas: List<Cita>, onMenuClick: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 CajaDato("$confirmadas", "Confirmadas", Modifier.weight(1f))
                 CajaDato("$completadas", "Completadas", Modifier.weight(1f))
+                CajaDato("$canceladas", "Canceladas", Modifier.weight(1f), colorValor = Color(0xFFB3261E))
             }
 
             Spacer(Modifier.height(20.dp))
@@ -100,14 +102,19 @@ fun PerfilScreen(citas: List<Cita>, onMenuClick: () -> Unit) {
 }
 
 @Composable
-fun CajaDato(valor: String, etiqueta: String, modifier: Modifier = Modifier) {
+fun CajaDato(
+    valor: String,
+    etiqueta: String,
+    modifier: Modifier = Modifier,
+    colorValor: Color = Color.Unspecified
+) {
     Column(
         modifier = modifier
             .background(GrisTarjeta, RoundedCornerShape(12.dp))
             .padding(vertical = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(valor, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+        Text(valor, fontWeight = FontWeight.Bold, fontSize = 22.sp, color = colorValor)
         Text(etiqueta, fontSize = 12.sp, color = TextoGris)
     }
 }
