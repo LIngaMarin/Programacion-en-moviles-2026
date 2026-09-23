@@ -71,3 +71,23 @@ com.lucasinga.semana05_clinicasalud
   <img src="capturas/a08_historial.png" width="200"/>
   <img src="capturas/a09_perfil.png" width="200"/>
 </p>
+
+## Mejora con IA (rama `mejora-ia-clinica`)
+
+Con el agente de **Gemini 3.6 Flash** en Android Studio se agregó la **cancelación de citas**. Los prompts usados y lo que se revisó o corrigió en cada uno están en [`PROMPTS.md`](PROMPTS.md).
+
+| Código | Requerimiento agregado |
+|---|---|
+| RF-10 | En Mis citas, las citas Confirmadas tienen el botón "Cancelar cita", que abre un AlertDialog de confirmación. |
+| RF-11 | Al confirmar, la cita pasa al estado "Cancelada" con etiqueta roja; al elegir "No" no cambia nada. |
+| RF-12 | Al cancelar aparece un Snackbar con la acción "Deshacer", que devuelve la cita a Confirmada. |
+| RF-13 | El Perfil muestra también el número de citas canceladas. |
+
+<p>
+  <img src="capturas/a10_dialogo_cancelar.png" width="200"/>
+  <img src="capturas/a11_cita_cancelada.png" width="200"/>
+</p>
+<p>
+  <img src="capturas/a12_snackbar.png" width="200"/>
+  <img src="capturas/a13_perfil_canceladas.png" width="200"/>
+</p>
