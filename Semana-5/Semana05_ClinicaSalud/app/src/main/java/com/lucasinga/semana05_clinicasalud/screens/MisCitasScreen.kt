@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.lucasinga.semana05_clinicasalud.model.Cita
 import com.lucasinga.semana05_clinicasalud.navigation.Screen
 import com.lucasinga.semana05_clinicasalud.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +31,10 @@ fun MisCitasScreen(
 ) {
     // estado para guardar la cita que se desea cancelar
     var citaACancelar by remember { mutableStateOf<Cita?>(null) }
+
+    // estado para controlar el snackbar y coroutine scope para llamadas asíncronas
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     // diálogo de confirmación para cancelar cita
     if (citaACancelar != null) {
@@ -45,8 +50,24 @@ fun MisCitasScreen(
                     onClick = {
                         val index = citas.indexOf(cita)
                         if (index != -1) {
+                            val citaCancelada = cita.copy(estado = "Cancelada")
                             // reemplaza la cita por una copia con estado Cancelada
-                            citas[index] = cita.copy(estado = "Cancelada")
+                            citas[index] = citaCancelada
+
+                            // muestra snackbar con la opción de deshacer la cancelación
+                            scope.launch {
+                                val resultado = snackbarHostState.showSnackbar(
+                                    message = "Cita con ${cita.medico} cancelada",
+                                    actionLabel = "Deshacer"
+                                )
+                                if (resultado == SnackbarResult.ActionPerformed) {
+                                    val idx = citas.indexOf(citaCancelada)
+                                    if (idx != -1) {
+                                        // restaura la cita a su estado Confirmada en la misma posición
+                                        citas[idx] = cita.copy(estado = "Confirmada")
+                                    }
+                                }
+                            }
                         }
                         citaACancelar = null
                     }
@@ -75,6 +96,7 @@ fun MisCitasScreen(
                 }
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         // FAB: acceso rápido para agendar otra cita, lleva al Inicio
         floatingActionButton = {
             FloatingActionButton(
