@@ -1,9 +1,7 @@
 package com.lucasinga.semana05_navegacion.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Groups
@@ -18,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.lucasinga.semana05_navegacion.components.TarjetaOpcion
 import com.lucasinga.semana05_navegacion.navigation.Screen
 
 @Composable
@@ -58,95 +57,21 @@ fun HomeScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { navController.navigate(Screen.List.route) },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(
-                                color = Color(0xFFEADDFF),
-                                shape = RoundedCornerShape(10.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Groups,
-                            contentDescription = null,
-                            tint = Color(0xFF6750A4)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = "Directorio de Alumnos",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1D1B20)
-                        )
-                        Text(
-                            text = "Ver y gestionar estudiantes",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF49454F)
-                        )
-                    }
-                }
-            }
+            TarjetaOpcion(
+                icono = Icons.Filled.Groups,
+                titulo = "Directorio de Alumnos",
+                subtitulo = "Ver y gestionar estudiantes",
+                onClick = { navController.navigate(Screen.List.route) }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { navController.navigate(Screen.Profile.route) },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .background(
-                                color = Color(0xFFEADDFF),
-                                shape = RoundedCornerShape(10.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = null,
-                            tint = Color(0xFF6750A4)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            text = "Mi Perfil Académico",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1D1B20)
-                        )
-                        Text(
-                            text = "Datos personales y progreso",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF49454F)
-                        )
-                    }
-                }
-            }
+            TarjetaOpcion(
+                icono = Icons.Filled.Person,
+                titulo = "Mi Perfil Académico",
+                subtitulo = "Datos personales y progreso",
+                onClick = { navController.navigate(Screen.Profile.route) }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
