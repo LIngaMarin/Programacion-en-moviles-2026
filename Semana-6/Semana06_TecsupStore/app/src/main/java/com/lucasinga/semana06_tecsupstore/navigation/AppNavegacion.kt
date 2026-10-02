@@ -51,6 +51,7 @@ fun AppNavegacion() {
         drawerContent = {
             AppDrawer(
                 rutaActual = rutaActual,
+                totalFavoritos = favoritos.size,
                 onNavegar = { ruta -> irA(ruta) },
                 onCerrarMenu = cerrarMenu
             )

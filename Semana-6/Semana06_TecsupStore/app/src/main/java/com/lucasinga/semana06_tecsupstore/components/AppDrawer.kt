@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -25,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,7 +39,12 @@ import com.lucasinga.semana06_tecsupstore.ui.theme.MoradoStore
 import com.lucasinga.semana06_tecsupstore.ui.theme.TextoGris
 
 @Composable
-fun AppDrawer(rutaActual: String?, onNavegar: (String) -> Unit, onCerrarMenu: () -> Unit) {
+fun AppDrawer(
+    rutaActual: String?,
+    totalFavoritos: Int,
+    onNavegar: (String) -> Unit,
+    onCerrarMenu: () -> Unit
+) {
     // ModalDrawerSheet: la hoja blanca que sale desde la izquierda
     ModalDrawerSheet {
         // encabezado: iniciales + datos del usuario
@@ -69,7 +76,8 @@ fun AppDrawer(rutaActual: String?, onNavegar: (String) -> Unit, onCerrarMenu: ()
         ItemMenu("Mis pedidos", Icons.Filled.ShoppingCart, rutaActual == Screen.MisPedidos.route) {
             onNavegar(Screen.MisPedidos.route)
         }
-        ItemMenu("Favoritos", Icons.Filled.Favorite, rutaActual == Screen.Favoritos.route) {
+        // solo Favoritos lleva contador
+        ItemMenu("Favoritos", Icons.Filled.Favorite, rutaActual == Screen.Favoritos.route, contador = totalFavoritos) {
             onNavegar(Screen.Favoritos.route)
         }
         ItemMenu("Perfil", Icons.Filled.Person, rutaActual == Screen.Perfil.route) {
@@ -82,12 +90,22 @@ fun AppDrawer(rutaActual: String?, onNavegar: (String) -> Unit, onCerrarMenu: ()
 }
 
 @Composable
-fun ItemMenu(texto: String, icono: ImageVector, seleccionado: Boolean, onClick: () -> Unit) {
+fun ItemMenu(
+    texto: String,
+    icono: ImageVector,
+    seleccionado: Boolean,
+    contador: Int = 0,
+    onClick: () -> Unit
+) {
     NavigationDrawerItem(
         label = { Text(texto) },
         icon = { Icon(icono, contentDescription = null) },
         selected = seleccionado,
         onClick = onClick,
+        // badge: solo aparece si hay al menos 1
+        badge = if (contador > 0) {
+            { Badge(containerColor = MoradoStore, contentColor = Color.White) { Text("$contador") } }
+        } else null,
         modifier = Modifier.padding(horizontal = 12.dp),
         // fondo lila y texto morado solo para el item activo
         colors = NavigationDrawerItemDefaults.colors(
