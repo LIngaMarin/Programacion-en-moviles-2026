@@ -17,3 +17,6 @@ val productos = listOf(
     Producto(5, "Tablet", 650.0, "Tecnologia"),
     Producto(6, "Cargador rapido", 45.0, "Accesorios")
 )
+
+val nombreUsuario = "Lucas Inga Marin"
+val correoUsuario = "lucas.inga@tecsup.edu.pe"

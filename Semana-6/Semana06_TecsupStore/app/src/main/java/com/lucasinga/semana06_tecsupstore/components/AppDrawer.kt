@@ -16,38 +16,40 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.lucasinga.semana06_tecsupstore.navigation.Screen
 
 @Composable
-fun AppDrawer(onCerrarMenu: () -> Unit) {
+fun AppDrawer(onNavegar: (String) -> Unit, onCerrarMenu: () -> Unit) {
     // ModalDrawerSheet: la hoja blanca que sale desde la izquierda
     ModalDrawerSheet {
         Spacer(Modifier.height(16.dp))
+        // cada item manda su ruta y AppNavegacion se encarga de navegar
         NavigationDrawerItem(
             label = { Text("Inicio") },
             icon = { Icon(Icons.Filled.Home, contentDescription = null) },
             selected = false,
-            onClick = onCerrarMenu,
+            onClick = { onNavegar(Screen.Inicio.route) },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         NavigationDrawerItem(
             label = { Text("Mis pedidos") },
             icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = null) },
             selected = false,
-            onClick = onCerrarMenu,
+            onClick = { onNavegar(Screen.MisPedidos.route) },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         NavigationDrawerItem(
             label = { Text("Favoritos") },
             icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
             selected = false,
-            onClick = onCerrarMenu,
+            onClick = { onNavegar(Screen.Favoritos.route) },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         NavigationDrawerItem(
             label = { Text("Perfil") },
             icon = { Icon(Icons.Filled.Person, contentDescription = null) },
             selected = false,
-            onClick = onCerrarMenu,
+            onClick = { onNavegar(Screen.Perfil.route) },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         NavigationDrawerItem(
