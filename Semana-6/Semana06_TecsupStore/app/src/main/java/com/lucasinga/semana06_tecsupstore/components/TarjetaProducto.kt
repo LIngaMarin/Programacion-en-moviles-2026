@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,10 +52,28 @@ fun TarjetaProducto(producto: Producto) {
                 Text(producto.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text("S/ ${"%.2f".format(producto.precio)}", color = TextoGris)
             }
-            // Box: aqui ira tambien el menu, pegado al icono que lo abre
+            // Box: el menu se abre pegado al icono que lo activa
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = "Opciones")
+                }
+                // onDismissRequest: se cierra al tocar fuera del menu
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Favoritos") },
+                        onClick = { expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Compartir") },
+                        onClick = { expanded = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Reportar") },
+                        onClick = { expanded = false }
+                    )
                 }
             }
         }
