@@ -1,5 +1,9 @@
 package com.lucasinga.semana06_tecsupstore.components
 
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,17 +66,23 @@ fun TarjetaProducto(producto: Producto) {
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
+                    // leadingIcon: icono a la izquierda de cada opcion
                     DropdownMenuItem(
                         text = { Text("Favoritos") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Compartir") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Reportar") },
-                        onClick = { expanded = false }
+                        onClick = { expanded = false },
+                        leadingIcon = { Icon(Icons.Filled.Warning, contentDescription = null) }
                     )
                 }
             }
