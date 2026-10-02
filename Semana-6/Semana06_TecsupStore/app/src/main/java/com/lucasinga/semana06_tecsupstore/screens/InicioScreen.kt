@@ -37,7 +37,7 @@ import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InicioScreen(onMenuClick: () -> Unit) {
+fun InicioScreen(onMenuClick: () -> Unit, favoritos: List<Int>, onFavorito: (Int) -> Unit) {
     // chip elegido; al cambiar se vuelve a dibujar la lista filtrada
     var categoriaSeleccionada by remember { mutableStateOf("Todos") }
 
@@ -94,7 +94,11 @@ fun InicioScreen(onMenuClick: () -> Unit) {
                 }
             }
             items(productosFiltrados) { producto ->
-                TarjetaProducto(producto)
+                TarjetaProducto(
+                    producto = producto,
+                    esFavorito = producto.id in favoritos,
+                    onFavorito = { onFavorito(producto.id) }
+                )
             }
         }
     }

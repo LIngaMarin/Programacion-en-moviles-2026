@@ -35,9 +35,10 @@ import com.lucasinga.semana06_tecsupstore.model.Producto
 import com.lucasinga.semana06_tecsupstore.ui.theme.LilaClaro
 import com.lucasinga.semana06_tecsupstore.ui.theme.MoradoStore
 import com.lucasinga.semana06_tecsupstore.ui.theme.TextoGris
+import androidx.compose.material.icons.filled.FavoriteBorder
 
 @Composable
-fun TarjetaProducto(producto: Producto) {
+fun TarjetaProducto(producto: Producto, esFavorito: Boolean, onFavorito: () -> Unit) {
     // cada tarjeta guarda si su propio menu esta abierto o cerrado
     var expanded by remember { mutableStateOf(false) }
 
@@ -67,10 +68,19 @@ fun TarjetaProducto(producto: Producto) {
                     onDismissRequest = { expanded = false }
                 ) {
                     // leadingIcon: icono a la izquierda de cada opcion
+                    // la tarjeta no guarda la lista, solo avisa hacia arriba con onFavorito
                     DropdownMenuItem(
-                        text = { Text("Favoritos") },
-                        onClick = { expanded = false },
-                        leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) }
+                        text = { Text(if (esFavorito) "Quitar de favoritos" else "Favoritos") },
+                        onClick = {
+                            onFavorito()
+                            expanded = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (esFavorito) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = null
+                            )
+                        }
                     )
                     HorizontalDivider()
                     DropdownMenuItem(

@@ -15,6 +15,8 @@ import com.lucasinga.semana06_tecsupstore.screens.MisPedidosScreen
 import com.lucasinga.semana06_tecsupstore.screens.PerfilScreen
 import kotlinx.coroutines.launch
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 
 @Composable
 fun AppNavegacion() {
@@ -23,6 +25,12 @@ fun AppNavegacion() {
     // abrir y cerrar el drawer es una animacion, por eso va con scope.launch
     val scope = rememberCoroutineScope()
     val rutaActual = navController.currentBackStackEntryAsState().value?.destination?.route
+    // lista compartida de favoritos: vive aqui arriba para que Inicio, Favoritos y el drawer usen la misma
+    val favoritos = remember { mutableStateListOf<Int>() }
+
+    fun cambiarFavorito(id: Int) {
+        if (id in favoritos) favoritos.remove(id) else favoritos.add(id)
+    }
 
     val abrirMenu: () -> Unit = { scope.launch { drawerState.open() } }
     val cerrarMenu: () -> Unit = { scope.launch { drawerState.close() } }
@@ -53,13 +61,17 @@ fun AppNavegacion() {
             startDestination = Screen.Inicio.route
         ) {
             composable(Screen.Inicio.route) {
-                InicioScreen(onMenuClick = abrirMenu)
+                InicioScreen(
+                    onMenuClick = abrirMenu,
+                    favoritos = favoritos,
+                    onFavorito = { id -> cambiarFavorito(id) }
+                )
             }
             composable(Screen.MisPedidos.route) {
                 MisPedidosScreen(onMenuClick = abrirMenu)
             }
             composable(Screen.Favoritos.route) {
-                FavoritosScreen(onMenuClick = abrirMenu)
+                FavoritosScreen(onMenuClick = abrirMenu, favoritos = favoritos)
             }
             composable(Screen.Perfil.route) {
                 PerfilScreen(onMenuClick = abrirMenu)
