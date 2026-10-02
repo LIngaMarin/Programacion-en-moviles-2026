@@ -14,6 +14,7 @@ import com.lucasinga.semana06_tecsupstore.screens.InicioScreen
 import com.lucasinga.semana06_tecsupstore.screens.MisPedidosScreen
 import com.lucasinga.semana06_tecsupstore.screens.PerfilScreen
 import kotlinx.coroutines.launch
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 fun AppNavegacion() {
@@ -21,6 +22,7 @@ fun AppNavegacion() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     // abrir y cerrar el drawer es una animacion, por eso va con scope.launch
     val scope = rememberCoroutineScope()
+    val rutaActual = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val abrirMenu: () -> Unit = { scope.launch { drawerState.open() } }
     val cerrarMenu: () -> Unit = { scope.launch { drawerState.close() } }
@@ -40,6 +42,7 @@ fun AppNavegacion() {
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
+                rutaActual = rutaActual,
                 onNavegar = { ruta -> irA(ruta) },
                 onCerrarMenu = cerrarMenu
             )
