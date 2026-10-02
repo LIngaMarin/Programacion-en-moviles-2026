@@ -30,10 +30,14 @@ import com.lucasinga.semana06_tecsupstore.components.TarjetaProducto
 import com.lucasinga.semana06_tecsupstore.model.categorias
 import com.lucasinga.semana06_tecsupstore.model.productos
 import com.lucasinga.semana06_tecsupstore.ui.theme.MoradoStore
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InicioScreen() {
+fun InicioScreen(onMenuClick: () -> Unit) {
     // chip elegido; al cambiar se vuelve a dibujar la lista filtrada
     var categoriaSeleccionada by remember { mutableStateOf("Todos") }
 
@@ -52,9 +56,16 @@ fun InicioScreen() {
                         Text("Mas vendidos", fontSize = 13.sp)
                     }
                 },
+                navigationIcon = {
+                    // icono ☰: abre el drawer (la funcion llega desde AppNavegacion)
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MoradoStore,
-                    titleContentColor = Color.White
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
