@@ -54,17 +54,24 @@ object Repositorio {
     // ================= FUNCIONES =================
 
     fun registrarUsuario(nombres: String, telefono: String, correo: String, contrasena: String): Boolean {
-        // TODO: si el telefono ya existe (any) devolver false; si no, agregarlo (add) y guardarlo en usuarioActual
-        return false
+        // any: revisa si ya hay alguien con ese telefono
+        if (usuarios.any { it.telefono == telefono }) return false
+        val nuevo = Usuario(nombres, telefono, correo, contrasena)
+        usuarios.add(nuevo)
+        // al registrarse ya queda con la sesion iniciada
+        usuarioActual = nuevo
+        return true
     }
 
     fun iniciarSesion(telefono: String, contrasena: String): Boolean {
-        // TODO: buscar el usuario con find y guardarlo en usuarioActual
-        return false
+        // find: devuelve el usuario que coincide, o null si no hay ninguno
+        val usuario = usuarios.find { it.telefono == telefono && it.contrasena == contrasena }
+        usuarioActual = usuario
+        return usuario != null
     }
 
     fun cerrarSesion() {
-        // TODO: dejar usuarioActual en null
+        usuarioActual = null
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
