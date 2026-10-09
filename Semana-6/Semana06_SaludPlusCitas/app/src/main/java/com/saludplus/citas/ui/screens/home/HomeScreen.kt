@@ -54,14 +54,17 @@ import com.saludplus.citas.ui.theme.NaranjaClaro
 import com.saludplus.citas.ui.theme.TextoGris
 import com.saludplus.citas.ui.theme.VerdeClaro
 import com.saludplus.citas.ui.theme.VerdeDisponible
+import com.saludplus.citas.ui.components.BarraInferior
 
 @Composable
 fun HomeScreen(navController: NavController) {
     // solo el primer nombre: "Lucas Inga Marin" -> "Lucas"
     val nombre = Repositorio.usuarioActual?.nombres?.substringBefore(" ") ?: ""
 
-    Scaffold(containerColor = FondoApp) { padding ->
-        LazyColumn(
+    Scaffold(
+        bottomBar = { BarraInferior(navController, Rutas.HOME) },
+        containerColor = FondoApp
+    ) { padding ->        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
