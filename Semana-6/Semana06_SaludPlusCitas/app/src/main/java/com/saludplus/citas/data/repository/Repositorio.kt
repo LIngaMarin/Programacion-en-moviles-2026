@@ -118,8 +118,15 @@ object Repositorio {
     }
 
     fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? {
-        // TODO: si el horario ya esta tomado (any) devolver null; si no, crear la cita y agregarla (add)
-        return null
+        val usuario = usuarioActual
+        if (usuario == null) return null
+        // any: si ese medico ya tiene una cita ese dia a esa hora, no se puede agendar
+        if (citas.any { it.medicoId == medicoId && it.fecha == fecha && it.hora == hora }) return null
+
+        val cita = Cita(siguienteIdCita, usuario.telefono, medicoId, fecha, hora, motivo)
+        siguienteIdCita++
+        citas.add(cita)
+        return cita
     }
 
     fun citasDelUsuario(): List<Cita> {
