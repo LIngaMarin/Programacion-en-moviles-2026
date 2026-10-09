@@ -40,24 +40,26 @@ object Repositorio {
     )
 
     // ---------- Medicos ----------
+    // cada medico atiende en algunos locales; cada local tiene minimo 1 medico por especialidad
     val medicos = listOf(
-        Medico(1, "Dr. Carlos Ramos", 1, "Medico general", 4.6, 64, "Disponible hoy", "23451"),
-        Medico(2, "Dra. Lucia Vega", 1, "Medica general", 4.8, 102, "Disponible mañana", "23452"),
-        Medico(3, "Dr. Jorge Salas", 2, "Pediatra", 4.7, 85, "Disponible hoy", "34561"),
-        Medico(4, "Dra. Ana Torres", 3, "Ginecologa", 4.9, 120, "Disponible hoy", "12345"),
-        Medico(5, "Dra. Claudia Rojas", 3, "Ginecologa", 4.8, 95, "Disponible mañana", "12346"),
-        Medico(6, "Dr. Luis Ramirez", 3, "Ginecologo", 4.7, 88, "Disponible hoy", "12347"),
-        Medico(7, "Dra. Mariana Soto", 3, "Ginecologa", 4.6, 76, "Disponible esta semana", "12348"),
-        Medico(8, "Dr. Miguel Paredes", 4, "Cardiologo", 4.8, 110, "Disponible hoy", "45671"),
-        Medico(9, "Dra. Sofia Medina", 5, "Dermatologa", 4.5, 58, "Disponible mañana", "56781"),
-        Medico(10, "Dr. Raul Castillo", 6, "Traumatologo", 4.4, 47, "Disponible hoy", "67891"),
-        Medico(11, "Dra. Elena Quispe", 7, "Oftalmologa", 4.7, 69, "Disponible esta semana", "78901"),
+        Medico(1, "Dr. Carlos Ramos", 1, "Medico general", 4.6, 64, "Disponible hoy", "23451", locales = listOf(1, 2, 3)),
+        Medico(2, "Dra. Lucia Vega", 1, "Medica general", 4.8, 102, "Disponible mañana", "23452", locales = listOf(4, 5, 6)),
+        Medico(3, "Dr. Jorge Salas", 2, "Pediatra", 4.7, 85, "Disponible hoy", "34561", locales = listOf(1, 3, 5)),
+        Medico(4, "Dra. Ana Torres", 3, "Ginecologa", 4.9, 120, "Disponible hoy", "12345", locales = listOf(1, 2, 4)),
+        Medico(5, "Dra. Claudia Rojas", 3, "Ginecologa", 4.8, 95, "Disponible mañana", "12346", locales = listOf(3, 5)),
+        Medico(6, "Dr. Luis Ramirez", 3, "Ginecologo", 4.7, 88, "Disponible hoy", "12347", locales = listOf(4, 6)),
+        Medico(7, "Dra. Mariana Soto", 3, "Ginecologa", 4.6, 76, "Disponible esta semana", "12348", locales = listOf(1, 6)),
+        Medico(8, "Dr. Miguel Paredes", 4, "Cardiologo", 4.8, 110, "Disponible hoy", "45671", locales = listOf(1, 2, 3)),
+        Medico(9, "Dra. Sofia Medina", 5, "Dermatologa", 4.5, 58, "Disponible mañana", "56781", locales = listOf(1, 3, 5)),
+        Medico(10, "Dr. Raul Castillo", 6, "Traumatologo", 4.4, 47, "Disponible hoy", "67891", locales = listOf(1, 2, 4)),
+        Medico(11, "Dra. Elena Quispe", 7, "Oftalmologa", 4.7, 69, "Disponible esta semana", "78901", locales = listOf(1, 2, 3)),
         // segundo medico para las especialidades que tenian uno solo
-        Medico(12, "Dra. Carmen Flores", 2, "Pediatra", 4.5, 52, "Disponible mañana", "34562"),
-        Medico(13, "Dr. Andres Vargas", 4, "Cardiologo", 4.6, 73, "Disponible esta semana", "45672"),
-        Medico(14, "Dr. Fernando Rios", 5, "Dermatologo", 4.7, 66, "Disponible hoy", "56782"),
-        Medico(15, "Dra. Patricia Leon", 6, "Traumatologa", 4.6, 54, "Disponible mañana", "67892"),
-        Medico(16, "Dr. Hugo Mendoza", 7, "Oftalmologo", 4.5, 41, "Disponible hoy", "78902")    )
+        Medico(12, "Dra. Carmen Flores", 2, "Pediatra", 4.5, 52, "Disponible mañana", "34562", locales = listOf(2, 4, 6)),
+        Medico(13, "Dr. Andres Vargas", 4, "Cardiologo", 4.6, 73, "Disponible esta semana", "45672", locales = listOf(4, 5, 6)),
+        Medico(14, "Dr. Fernando Rios", 5, "Dermatologo", 4.7, 66, "Disponible hoy", "56782", locales = listOf(2, 4, 6)),
+        Medico(15, "Dra. Patricia Leon", 6, "Traumatologa", 4.6, 54, "Disponible mañana", "67892", locales = listOf(3, 5, 6)),
+        Medico(16, "Dr. Hugo Mendoza", 7, "Oftalmologo", 4.5, 41, "Disponible hoy", "78902", locales = listOf(4, 5, 6))
+    )
 
     // ---------- Fechas y horarios (lista fija en la Fase 1) ----------
     val diasDisponibles = listOf("Lun 15", "Mar 16", "Mie 17", "Jue 18", "Vie 19")
@@ -126,8 +128,22 @@ object Repositorio {
             .sortedByDescending { it.calificacion }
     }
 
-    fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> {
+    fun medicosDelLocal(especialidadId: Int): List<Medico> {
+        // de esa especialidad, solo los que atienden en el local elegido
+        val local = localActual
         return medicosPorEspecialidad(especialidadId)
+            .filter { local == null || local.id in it.locales }
+    }
+
+    fun sedesDelMedico(medico: Medico): String {
+        // filter + joinToString: "Miraflores, San Isidro, Santiago de Surco"
+        return locales
+            .filter { it.id in medico.locales }
+            .joinToString(", ") { it.distrito }
+    }
+
+    fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> {
+        return medicosDelLocal(especialidadId)
             .filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 

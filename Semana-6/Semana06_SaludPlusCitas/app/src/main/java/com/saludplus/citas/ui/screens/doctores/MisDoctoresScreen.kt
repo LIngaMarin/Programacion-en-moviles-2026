@@ -55,7 +55,7 @@ fun MisDoctoresScreen(navController: NavController) {
                     }
                 }
                 items(medicos) { medico ->
-                    TarjetaMedico(medico)
+                    TarjetaMedico(medico, sedes = Repositorio.sedesDelMedico(medico))
                 }
             }
         }

@@ -24,7 +24,9 @@ import com.saludplus.citas.ui.theme.TextoGris
 fun MedicosScreen(navController: NavController, especialidadId: Int) {
     // con el id que llego por la ruta se busca la especialidad y sus medicos
     val especialidad = Repositorio.obtenerEspecialidad(especialidadId)
-    val medicos = Repositorio.medicosPorEspecialidad(especialidadId)
+    // solo los medicos que atienden en el local elegido
+    val medicos = Repositorio.medicosDelLocal(especialidadId)
+    val local = Repositorio.localActual
 
     Scaffold(
         topBar = {
@@ -41,7 +43,7 @@ fun MedicosScreen(navController: NavController, especialidadId: Int) {
         ) {
             item {
                 Text(
-                    "${medicos.size} medicos · ordenados por calificacion",
+                    "${medicos.size} medicos en ${local?.distrito ?: "todas las sedes"} · ordenados por calificacion",
                     color = TextoGris,
                     fontSize = 13.sp
                 )

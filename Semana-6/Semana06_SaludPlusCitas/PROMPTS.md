@@ -169,6 +169,25 @@ Quiero que todo el tema use la paleta de mi Color.kt: AzulPrimario, AzulClaro, F
 
 ---
 
+## Prompt 9 – Médicos por local
+
+**Qué le pedí:** que cada local tenga sus propios médicos, porque era raro que todas las sedes tuvieran los mismos.
+
+```text
+En mi app todas las sedes muestran los mismos médicos. Quiero que cada médico atienda solo en algunos locales
+y que al agendar solo salgan los médicos del local elegido. En "Mis doctores" deben seguir saliendo todos
+(mínimo 2 por especialidad), pero indicando en qué distritos atiende cada uno.
+```
+
+**Respuesta resumida:** agregó a `Medico` una lista `locales` con los ids de las sedes donde atiende. En el `Repositorio` creó `medicosDelLocal`, que filtra por `localActual`, y `sedesDelMedico`, que arma el texto de los distritos con `filter` + `joinToString`. La pantalla Médicos usa `medicosDelLocal` y "Mis doctores" muestra las sedes en la tarjeta.
+
+**Qué tuve que corregir / revisar:**
+- Repartí los médicos para que cada local tenga al menos 1 médico de cada especialidad. Si no, alguna sede se quedaba con la lista vacía.
+- `medicosPorEspecialidad` no se cambió, porque "Mis doctores" debe seguir mostrando a todos (mínimo 2 por categoría).
+- A `locales` le dejé un valor por defecto (todos los locales) para no romper los demás usos de `Medico`.
+
+---
+
 ## Commits de esta rama
 
 | # | Commit | Prompt |
@@ -183,3 +202,5 @@ Quiero que todo el tema use la paleta de mi Color.kt: AzulPrimario, AzulClaro, F
 | 8 | Mis doctores agrupados por especialidad | Prompt 7 |
 | 9 | Colores del tema con la paleta de la app | Prompt 8 |
 | 10 | Actualización de prompts (este archivo) | – |
+| 11 | Segundo médico en las especialidades que tenían uno | Prompt 7 |
+| 12 | Médicos por local | Prompt 9 |

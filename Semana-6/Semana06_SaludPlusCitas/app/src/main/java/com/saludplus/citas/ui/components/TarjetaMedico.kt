@@ -35,7 +35,12 @@ import com.saludplus.citas.ui.theme.VerdeDisponible
 
 // tarjeta del medico: en Medicos se puede tocar; en Fecha y hora y Confirmar solo se muestra
 @Composable
-fun TarjetaMedico(medico: Medico, conCmp: Boolean = false, onClick: (() -> Unit)? = null) {
+fun TarjetaMedico(
+    medico: Medico,
+    conCmp: Boolean = false,
+    sedes: String = "",
+    onClick: (() -> Unit)? = null
+) {
     // iniciales en vez de foto: "Dra. Ana Torres" -> "AT"
     val iniciales = medico.nombre.split(" ").drop(1).take(2).joinToString("") { it.take(1) }
     val modificador = if (onClick != null) Modifier.clickable { onClick() } else Modifier
@@ -60,6 +65,10 @@ fun TarjetaMedico(medico: Medico, conCmp: Boolean = false, onClick: (() -> Unit)
             Column {
                 Text(medico.nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(medico.titulo, color = TextoGris, fontSize = 13.sp)
+                // en Mis doctores se muestran los locales donde atiende
+                if (sedes.isNotBlank()) {
+                    Text("📍 $sedes", color = AzulPrimario, fontSize = 12.sp)
+                }
                 if (conCmp) {
                     Text("CMP: ${medico.cmp}", color = TextoGris, fontSize = 13.sp)
                 } else {
