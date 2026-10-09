@@ -104,6 +104,8 @@ fun DetalleCitaScreen(navController: NavController, citaId: Int) {
             if (mostrarDialogo) {
                 AlertDialog(
                     onDismissRequest = { mostrarDialogo = false },
+                    // fondo blanco como las tarjetas de la app
+                    containerColor = Color.White,
                     title = { Text("Cancelar cita") },
                     text = { Text("¿Seguro que quieres cancelar tu cita con ${medico?.nombre ?: ""}?") },
                     confirmButton = {
@@ -118,7 +120,7 @@ fun DetalleCitaScreen(navController: NavController, citaId: Int) {
                     },
                     dismissButton = {
                         TextButton(onClick = { mostrarDialogo = false }) {
-                            Text("No")
+                            Text("No", color = TextoGris)
                         }
                     }
                 )
