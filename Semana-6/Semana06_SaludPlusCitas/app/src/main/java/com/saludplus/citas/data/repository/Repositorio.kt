@@ -109,8 +109,12 @@ object Repositorio {
     }
 
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
-        // TODO: citas: filter + map; horariosBase: filter
-        return emptyList()
+        // 1. horas ya reservadas con ese medico ese dia (filter + map)
+        val ocupados = citas
+            .filter { it.medicoId == medicoId && it.fecha == fecha }
+            .map { it.hora }
+        // 2. de todos los horarios, solo los que no estan ocupados (filter)
+        return horariosBase.filter { it !in ocupados }
     }
 
     fun agendarCita(medicoId: Int, fecha: String, hora: String, motivo: String): Cita? {
