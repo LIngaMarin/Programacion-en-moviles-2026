@@ -17,3 +17,8 @@ val TextoGris = Color(0xFF6B7280)
 val VerdeDisponible = Color(0xFF16A34A)
 val VerdeClaro = Color(0xFFDCFCE7)
 val RojoError = Color(0xFFDC2626)
+
+val MoradoClaro = Color(0xFFF3E8FF)
+val Morado = Color(0xFF9333EA)
+val NaranjaClaro = Color(0xFFFFEDD5)
+val Naranja = Color(0xFFEA580C)
