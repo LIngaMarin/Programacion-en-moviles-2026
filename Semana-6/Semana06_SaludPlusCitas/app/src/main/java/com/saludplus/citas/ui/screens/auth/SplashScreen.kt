@@ -9,19 +9,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -33,25 +32,40 @@ import androidx.navigation.NavController
 import com.saludplus.citas.R
 import com.saludplus.citas.navigation.Rutas
 import com.saludplus.citas.ui.components.BotonPrimario
-import com.saludplus.citas.ui.theme.AzulClaro
 import com.saludplus.citas.ui.theme.AzulPrimario
 import com.saludplus.citas.ui.theme.TextoGris
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    Scaffold(containerColor = AzulClaro) { padding ->
+    // fondo del mismo celeste que el borde de la imagen, asi todo se ve como una sola pantalla
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE7F4FE))
+            .statusBarsPadding()
+    ) {
+        // ilustracion del doctor completa y de borde a borde (FillWidth: no se recorta)
+        Image(
+            painter = painterResource(R.drawable.doctor_splash),
+            contentDescription = "Doctor",
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // en el espacio que queda: logo, nombre y botones
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp),
+                .weight(1f)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             // logo: corazon azul dentro de un circulo blanco
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(56.dp)
                     .background(Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -59,26 +73,14 @@ fun SplashScreen(navController: NavController) {
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = "Logo SaludPlus",
                     colorFilter = ColorFilter.tint(AzulPrimario),
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            Text("Clinica", fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = AzulPrimario)
-            Text("SaludPlus", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = AzulPrimario)
+            Spacer(Modifier.height(8.dp))
+            Text("Clinica", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = AzulPrimario)
+            Text("SaludPlus", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = AzulPrimario)
             Text("Tu salud, nuestra prioridad", color = TextoGris)
             Spacer(Modifier.height(20.dp))
-
-            // ilustracion del doctor del diseño (res/drawable/doctor_splash.png)
-            Image(
-                painter = painterResource(R.drawable.doctor_splash),
-                contentDescription = "Doctor",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .clip(RoundedCornerShape(20.dp))
-            )
-            Spacer(Modifier.height(24.dp))
 
             BotonPrimario("Comenzar") { navController.navigate(Rutas.REGISTRO) }
             TextButton(onClick = { navController.navigate(Rutas.LOGIN) }) {
