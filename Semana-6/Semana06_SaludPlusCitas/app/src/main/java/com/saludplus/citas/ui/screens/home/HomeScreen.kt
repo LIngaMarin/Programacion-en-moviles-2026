@@ -21,7 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
@@ -90,7 +90,7 @@ fun HomeScreen(navController: NavController) {
                 }
             }
 
-            // las 4 tarjetas de accion, en 2 filas de 2
+            // tarjetas de accion del menu
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     // ya no hay "Agendar cita": primero se elige un local
@@ -110,6 +110,12 @@ fun HomeScreen(navController: NavController) {
                     TarjetaAccion("Resultados", Icons.Filled.Info, Naranja, NaranjaClaro, Modifier.weight(1f)) {
                         navController.navigate(Rutas.RESULTADOS)
                     }
+                }
+            }
+            // opcion nueva: todos los doctores agrupados por especialidad
+            item {
+                TarjetaAccion("Mis doctores", Icons.Filled.Face, AzulPrimario, AzulClaro, Modifier.fillMaxWidth()) {
+                    navController.navigate(Rutas.MIS_DOCTORES)
                 }
             }
 
