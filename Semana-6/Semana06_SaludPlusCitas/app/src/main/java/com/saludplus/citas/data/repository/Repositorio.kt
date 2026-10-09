@@ -75,38 +75,37 @@ object Repositorio {
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
-        // TODO: filter + contains
-        return emptyList()
+        // contains con ignoreCase: "card" encuentra "Cardiologia"
+        return especialidades.filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
     fun especialidadesDestacadas(): List<Especialidad> {
-        // TODO: take
-        return emptyList()
+        // take(3): solo las 3 primeras para la fila del Inicio
+        return especialidades.take(3)
     }
 
     fun obtenerEspecialidad(id: Int): Especialidad? {
-        // TODO: find
-        return null
+        return especialidades.find { it.id == id }
     }
 
     fun obtenerMedico(id: Int): Medico? {
-        // TODO: find
-        return null
+        return medicos.find { it.id == id }
     }
 
     fun obtenerCita(id: Int): Cita? {
-        // TODO: find
-        return null
+        return citas.find { it.id == id }
     }
 
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> {
-        // TODO: filter + sortedByDescending
-        return emptyList()
+        // solo los de esa especialidad, el mejor calificado primero
+        return medicos
+            .filter { it.especialidadId == especialidadId }
+            .sortedByDescending { it.calificacion }
     }
 
     fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> {
-        // TODO: medicos de la especialidad que contengan el texto
-        return emptyList()
+        return medicosPorEspecialidad(especialidadId)
+            .filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
