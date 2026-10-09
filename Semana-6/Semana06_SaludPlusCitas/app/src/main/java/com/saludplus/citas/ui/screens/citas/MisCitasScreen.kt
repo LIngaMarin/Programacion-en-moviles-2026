@@ -1,6 +1,7 @@
 package com.saludplus.citas.ui.screens.citas
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,7 +89,10 @@ fun MisCitasScreen(navController: NavController) {
                     val medico = Repositorio.obtenerMedico(cita.medicoId)
                     val especialidad = Repositorio.obtenerEspecialidad(medico?.especialidadId ?: 0)
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // al tocar la cita se abre su detalle
+                            .clickable { navController.navigate(Rutas.detalleCita(cita.id)) },
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -113,7 +117,8 @@ fun MisCitasScreen(navController: NavController) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Filled.DateRange, contentDescription = null, tint = TextoGris, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("${textoFecha(cita.fecha)} · ${cita.hora}", fontSize = 13.sp)                            }
+                                Text("${textoFecha(cita.fecha)} · ${cita.hora}", fontSize = 13.sp)
+                            }
                         }
                     }
                 }
