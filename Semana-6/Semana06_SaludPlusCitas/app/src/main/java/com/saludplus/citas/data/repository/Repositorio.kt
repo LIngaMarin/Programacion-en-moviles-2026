@@ -130,11 +130,14 @@ object Repositorio {
     }
 
     fun citasDelUsuario(): List<Cita> {
-        // TODO: filter + sortedWith
-        return emptyList()
+        // solo las citas del usuario con sesion iniciada; la mas reciente primero
+        return citas
+            .filter { it.telefonoUsuario == usuarioActual?.telefono }
+            .sortedWith(compareByDescending { it.id })
     }
 
     fun cancelarCita(citaId: Int) {
-        // TODO: removeIf
+        // removeIf: borra de la lista la cita con ese id
+        citas.removeIf { it.id == citaId }
     }
 }
