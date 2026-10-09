@@ -40,11 +40,19 @@ import com.saludplus.citas.ui.theme.TextoGris
 import com.saludplus.citas.util.diaCorto
 import com.saludplus.citas.util.diasHabiles
 import com.saludplus.citas.util.textoMes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.mutableIntStateOf
 
 @Composable
 fun FechaHoraScreen(navController: NavController, medicoId: Int) {
     val medico = Repositorio.obtenerMedico(medicoId)
-    val dias = diasHabiles(0)
+    // semana 0 = la actual; las flechas la suben o la bajan
+    var semana by remember { mutableIntStateOf(0) }
+    val dias = diasHabiles(semana)
     var diaSeleccionado by remember { mutableStateOf("") }
     var horaSeleccionada by remember { mutableStateOf("") }
 
@@ -70,12 +78,36 @@ fun FechaHoraScreen(navController: NavController, medicoId: Int) {
                 TarjetaMedico(medico)
             }
 
-            Text(
-                textoMes(dias.first()),
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
+                        semana--
+                        // al cambiar de semana se reinician el dia y la hora
+                        diaSeleccionado = ""
+                        horaSeleccionada = ""
+                    },
+                    // no se puede retroceder antes de la semana actual
+                    enabled = semana > 0
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Semana anterior")
+                }
+                Text(
+                    textoMes(dias.first()),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = {
+                        semana++
+                        diaSeleccionado = ""
+                        horaSeleccionada = ""
+                    }
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Semana siguiente")
+                }
+            }
 
             // fila de dias (lista fija en la Fase 1)
             // fila con los 5 dias habiles reales
