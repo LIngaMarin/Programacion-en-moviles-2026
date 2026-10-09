@@ -4,6 +4,7 @@ import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.model.Usuario
+import com.saludplus.citas.util.diasHabiles
 
 // object: una sola instancia para toda la app, asi todas las pantallas usan las mismas listas
 object Repositorio {
@@ -47,8 +48,7 @@ object Repositorio {
     // ---------- Citas ----------
     // cita de otro paciente: ese horario ya no debe salir disponible
     val citas = mutableListOf(
-        Cita(1, "999888777", 4, "Mar 16", "09:00", "Control")
-    )
+        Cita(1, "999888777", 4, diasHabiles(0)[1].toString(), "09:00", "Control")    )
     private var siguienteIdCita = 2
 
     // ================= FUNCIONES =================

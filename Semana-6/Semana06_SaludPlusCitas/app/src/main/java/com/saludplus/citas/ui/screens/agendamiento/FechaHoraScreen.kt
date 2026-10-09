@@ -37,10 +37,14 @@ import com.saludplus.citas.ui.theme.AzulClaro
 import com.saludplus.citas.ui.theme.AzulPrimario
 import com.saludplus.citas.ui.theme.FondoApp
 import com.saludplus.citas.ui.theme.TextoGris
+import com.saludplus.citas.util.diaCorto
+import com.saludplus.citas.util.diasHabiles
+import com.saludplus.citas.util.textoMes
 
 @Composable
 fun FechaHoraScreen(navController: NavController, medicoId: Int) {
     val medico = Repositorio.obtenerMedico(medicoId)
+    val dias = diasHabiles(0)
     var diaSeleccionado by remember { mutableStateOf("") }
     var horaSeleccionada by remember { mutableStateOf("") }
 
@@ -67,33 +71,35 @@ fun FechaHoraScreen(navController: NavController, medicoId: Int) {
             }
 
             Text(
-                "Setiembre 2026",
+                textoMes(dias.first()),
                 fontWeight = FontWeight.Bold,
                 fontSize = 17.sp,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             // fila de dias (lista fija en la Fase 1)
+            // fila con los 5 dias habiles reales
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Repositorio.diasDisponibles.forEach { dia ->
-                    val partes = dia.split(" ") // "Mar 16" -> ["Mar", "16"]
-                    val elegido = dia == diaSeleccionado
+                dias.forEach { fecha ->
+                    // la fecha se guarda como "2026-10-12" para compararla con las citas
+                    val valor = fecha.toString()
+                    val elegido = valor == diaSeleccionado
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
                             .background(if (elegido) AzulPrimario else Color.White)
                             .clickable {
-                                diaSeleccionado = dia
+                                diaSeleccionado = valor
                                 // al cambiar de dia, la hora elegida se reinicia
                                 horaSeleccionada = ""
                             }
                             .padding(vertical = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(partes[0], fontSize = 12.sp, color = if (elegido) Color.White else TextoGris)
+                        Text(diaCorto(fecha), fontSize = 12.sp, color = if (elegido) Color.White else TextoGris)
                         Text(
-                            partes[1],
+                            "${fecha.dayOfMonth}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (elegido) Color.White else Color.Black
