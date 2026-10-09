@@ -149,7 +149,7 @@ Reutiliza TarjetaMedico y medicosPorEspecialidad del Repositorio. Mismos colores
 **Qué tuve que corregir / revisar:**
 - Revisé que cada especialidad muestre cuántos médicos tiene y que los médicos salgan ordenados por calificación, igual que en la pantalla Médicos.
 - Las tarjetas del Inicio ya eran 4 en 2 filas. Puse "Mis doctores" como tarjeta ancha debajo, con los mismos colores azules de la app.
-
+- Varias especialidades tenían un solo médico y se pedía mínimo 2 por categoría. Agregué un segundo médico a Pediatría, Cardiología, Dermatología, Traumatología y Oftalmología.
 ---
 
 ## Prompt 8 – Colores de la app en todo el tema

@@ -51,8 +51,13 @@ object Repositorio {
         Medico(8, "Dr. Miguel Paredes", 4, "Cardiologo", 4.8, 110, "Disponible hoy", "45671"),
         Medico(9, "Dra. Sofia Medina", 5, "Dermatologa", 4.5, 58, "Disponible mañana", "56781"),
         Medico(10, "Dr. Raul Castillo", 6, "Traumatologo", 4.4, 47, "Disponible hoy", "67891"),
-        Medico(11, "Dra. Elena Quispe", 7, "Oftalmologa", 4.7, 69, "Disponible esta semana", "78901")
-    )
+        Medico(11, "Dra. Elena Quispe", 7, "Oftalmologa", 4.7, 69, "Disponible esta semana", "78901"),
+        // segundo medico para las especialidades que tenian uno solo
+        Medico(12, "Dra. Carmen Flores", 2, "Pediatra", 4.5, 52, "Disponible mañana", "34562"),
+        Medico(13, "Dr. Andres Vargas", 4, "Cardiologo", 4.6, 73, "Disponible esta semana", "45672"),
+        Medico(14, "Dr. Fernando Rios", 5, "Dermatologo", 4.7, 66, "Disponible hoy", "56782"),
+        Medico(15, "Dra. Patricia Leon", 6, "Traumatologa", 4.6, 54, "Disponible mañana", "67892"),
+        Medico(16, "Dr. Hugo Mendoza", 7, "Oftalmologo", 4.5, 41, "Disponible hoy", "78902")    )
 
     // ---------- Fechas y horarios (lista fija en la Fase 1) ----------
     val diasDisponibles = listOf("Lun 15", "Mar 16", "Mie 17", "Jue 18", "Vie 19")
