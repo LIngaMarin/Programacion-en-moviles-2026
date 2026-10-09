@@ -90,7 +90,7 @@ fun CitaExitosaScreen(navController: NavController, citaId: Int) {
                     FilaDato(Icons.Filled.Favorite, "Especialidad", especialidad?.nombre ?: "")
                     FilaDato(Icons.Filled.DateRange, "Fecha", if (cita != null) textoFecha(cita.fecha) else "")
                     FilaDato(Icons.Filled.Notifications, "Hora", cita?.hora ?: "")
-                    FilaDato(Icons.Filled.LocationOn, "Local", cita?.local ?: "")
+                    FilaDato(Icons.Filled.LocationOn, "Sede", cita?.local ?: "")
                 }
             }
             Spacer(Modifier.height(24.dp))

@@ -79,7 +79,7 @@ fun ConfirmarCitaScreen(navController: NavController, medicoId: Int, fecha: Stri
                     FilaDato(Icons.Filled.Notifications, "Hora", "$hora a $horaFin")
                     FilaDato(Icons.Filled.Person, "Tipo de atencion", "Consulta presencial")
                     // la direccion ahora sale del local elegido
-                    FilaDato(Icons.Filled.LocationOn, "Local", local?.nombre ?: "")
+                    FilaDato(Icons.Filled.LocationOn, "Sede", local?.nombre ?: "")
                     FilaDato(Icons.Filled.LocationOn, "Direccion", "${local?.direccion ?: ""}, ${local?.distrito ?: ""}")
                 }
             }

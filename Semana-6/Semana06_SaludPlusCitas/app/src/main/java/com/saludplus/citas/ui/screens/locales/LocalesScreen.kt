@@ -43,7 +43,7 @@ import com.saludplus.citas.ui.theme.TextoGris
 @Composable
 fun LocalesScreen(navController: NavController) {
     Scaffold(
-        topBar = { BarraSuperior("Locales") { navController.popBackStack() } },
+        topBar = { BarraSuperior("Sedes") { navController.popBackStack() } },
         containerColor = FondoApp
     ) { padding ->
         LazyColumn(

@@ -94,7 +94,7 @@ fun HomeScreen(navController: NavController) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     // ya no hay "Agendar cita": primero se elige un local
-                    TarjetaAccion("Locales", Icons.Filled.LocationOn, AzulPrimario, AzulClaro, Modifier.weight(1f)) {
+                    TarjetaAccion("Sedes", Icons.Filled.LocationOn, AzulPrimario, AzulClaro, Modifier.weight(1f)) {
                         navController.navigate(Rutas.LOCALES)
                     }
                     TarjetaAccion("Mis citas", Icons.AutoMirrored.Filled.List, VerdeDisponible, VerdeClaro, Modifier.weight(1f)) {

@@ -84,7 +84,7 @@ fun DetalleCitaScreen(navController: NavController, citaId: Int) {
                         FilaDato(Icons.Filled.Favorite, "Especialidad", especialidad?.nombre ?: "")
                         FilaDato(Icons.Filled.DateRange, "Fecha", textoFecha(cita.fecha))
                         FilaDato(Icons.Filled.Notifications, "Hora", cita.hora)
-                        FilaDato(Icons.Filled.LocationOn, "Local", cita.local)
+                        FilaDato(Icons.Filled.LocationOn, "Sede", cita.local)
                         FilaDato(Icons.Filled.Info, "Motivo", cita.motivo.ifBlank { "Sin motivo" })
                     }
                 }
