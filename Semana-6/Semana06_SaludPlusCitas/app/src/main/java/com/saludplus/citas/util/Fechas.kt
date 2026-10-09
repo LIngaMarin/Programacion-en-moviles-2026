@@ -33,3 +33,12 @@ fun textoMes(fecha: LocalDate): String {
     val mes = nombresMeses[fecha.monthValue - 1].replaceFirstChar { it.uppercase() }
     return "$mes ${fecha.year}"
 }
+
+// "2026-10-13" -> "Martes 13 de octubre 2026"
+fun textoFecha(fechaGuardada: String): String {
+    // parse convierte el texto guardado otra vez en LocalDate
+    val fecha = LocalDate.parse(fechaGuardada)
+    val dia = nombresDias[fecha.dayOfWeek.value - 1]
+    val mes = nombresMeses[fecha.monthValue - 1]
+    return "$dia ${fecha.dayOfMonth} de $mes ${fecha.year}"
+}

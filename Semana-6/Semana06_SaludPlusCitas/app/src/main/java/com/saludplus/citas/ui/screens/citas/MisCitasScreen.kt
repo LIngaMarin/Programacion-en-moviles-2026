@@ -41,6 +41,7 @@ import com.saludplus.citas.ui.theme.AzulClaro
 import com.saludplus.citas.ui.theme.AzulPrimario
 import com.saludplus.citas.ui.theme.FondoApp
 import com.saludplus.citas.ui.theme.TextoGris
+import com.saludplus.citas.util.textoFecha
 
 @Composable
 fun MisCitasScreen(navController: NavController) {
@@ -112,8 +113,7 @@ fun MisCitasScreen(navController: NavController) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Filled.DateRange, contentDescription = null, tint = TextoGris, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("${cita.fecha} de setiembre · ${cita.hora}", fontSize = 13.sp)
-                            }
+                                Text("${textoFecha(cita.fecha)} · ${cita.hora}", fontSize = 13.sp)                            }
                         }
                     }
                 }

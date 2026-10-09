@@ -40,6 +40,7 @@ import com.saludplus.citas.ui.theme.FondoApp
 import com.saludplus.citas.ui.theme.TextoGris
 import com.saludplus.citas.ui.theme.VerdeClaro
 import com.saludplus.citas.ui.theme.VerdeDisponible
+import com.saludplus.citas.util.textoFecha
 
 @Composable
 fun CitaExitosaScreen(navController: NavController, citaId: Int) {
@@ -86,7 +87,7 @@ fun CitaExitosaScreen(navController: NavController, citaId: Int) {
                 ) {
                     FilaDato(Icons.Filled.Person, "Medico", medico?.nombre ?: "")
                     FilaDato(Icons.Filled.Favorite, "Especialidad", especialidad?.nombre ?: "")
-                    FilaDato(Icons.Filled.DateRange, "Fecha", "${cita?.fecha ?: ""} de setiembre 2026")
+                    FilaDato(Icons.Filled.DateRange, "Fecha", if (cita != null) textoFecha(cita.fecha) else "")
                     FilaDato(Icons.Filled.Notifications, "Hora", cita?.hora ?: "")
                 }
             }

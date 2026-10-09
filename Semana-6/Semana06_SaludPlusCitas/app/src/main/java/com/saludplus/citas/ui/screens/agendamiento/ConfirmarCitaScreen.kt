@@ -38,6 +38,7 @@ import com.saludplus.citas.ui.components.TarjetaMedico
 import com.saludplus.citas.ui.theme.FondoApp
 import com.saludplus.citas.ui.theme.RojoError
 import com.saludplus.citas.ui.theme.TextoGris
+import com.saludplus.citas.util.textoFecha
 
 @Composable
 fun ConfirmarCitaScreen(navController: NavController, medicoId: Int, fecha: String, hora: String) {
@@ -73,7 +74,7 @@ fun ConfirmarCitaScreen(navController: NavController, medicoId: Int, fecha: Stri
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    FilaDato(Icons.Filled.DateRange, "Fecha", "$fecha de setiembre 2026")
+                    FilaDato(Icons.Filled.DateRange, "Fecha", textoFecha(fecha))
                     FilaDato(Icons.Filled.Notifications, "Hora", "$hora a $horaFin")
                     FilaDato(Icons.Filled.Person, "Tipo de atencion", "Consulta presencial")
                     FilaDato(Icons.Filled.LocationOn, "Direccion", "Av. Los Olivos 123, Lima")
