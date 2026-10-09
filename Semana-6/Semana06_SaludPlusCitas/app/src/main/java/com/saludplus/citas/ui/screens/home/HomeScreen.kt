@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
@@ -77,6 +78,11 @@ fun HomeScreen(navController: NavController) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("¡Hola, $nombre!", fontSize = 26.sp, fontWeight = FontWeight.Bold)
                         Text("¿Que deseas hacer hoy?", color = TextoGris)
+                        // local elegido, si ya hay uno
+                        val local = Repositorio.localActual
+                        if (local != null) {
+                            Text("📍 ${local.nombre}", color = AzulPrimario, fontSize = 13.sp)
+                        }
                     }
                     IconButton(onClick = { navController.navigate(Rutas.NOTIFICACIONES) }) {
                         Icon(Icons.Filled.Notifications, contentDescription = "Notificaciones", tint = AzulPrimario)
@@ -87,8 +93,9 @@ fun HomeScreen(navController: NavController) {
             // las 4 tarjetas de accion, en 2 filas de 2
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    TarjetaAccion("Agendar cita", Icons.Filled.DateRange, AzulPrimario, AzulClaro, Modifier.weight(1f)) {
-                        navController.navigate(Rutas.ESPECIALIDADES)
+                    // ya no hay "Agendar cita": primero se elige un local
+                    TarjetaAccion("Locales", Icons.Filled.LocationOn, AzulPrimario, AzulClaro, Modifier.weight(1f)) {
+                        navController.navigate(Rutas.LOCALES)
                     }
                     TarjetaAccion("Mis citas", Icons.AutoMirrored.Filled.List, VerdeDisponible, VerdeClaro, Modifier.weight(1f)) {
                         navController.navigate(Rutas.MIS_CITAS)
@@ -115,7 +122,11 @@ fun HomeScreen(navController: NavController) {
                         fontSize = 16.sp,
                         modifier = Modifier.weight(1f)
                     )
-                    TextButton(onClick = { navController.navigate(Rutas.ESPECIALIDADES) }) {
+                    TextButton(onClick = {
+                        // sin local elegido, primero se pasa por Locales
+                        if (Repositorio.localActual == null) navController.navigate(Rutas.LOCALES)
+                        else navController.navigate(Rutas.ESPECIALIDADES)
+                    }) {
                         Text("Ver todas", color = AzulPrimario)
                     }
                 }
@@ -128,7 +139,10 @@ fun HomeScreen(navController: NavController) {
                         Card(
                             modifier = Modifier
                                 .width(110.dp)
-                                .clickable { navController.navigate(Rutas.medicos(especialidad.id)) },
+                                .clickable {
+                                    if (Repositorio.localActual == null) navController.navigate(Rutas.LOCALES)
+                                    else navController.navigate(Rutas.medicos(especialidad.id))
+                                },
                             colors = CardDefaults.cardColors(containerColor = Color.White)
                         ) {
                             Column(

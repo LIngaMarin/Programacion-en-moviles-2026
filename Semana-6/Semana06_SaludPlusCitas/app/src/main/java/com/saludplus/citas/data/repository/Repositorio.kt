@@ -2,6 +2,7 @@ package com.saludplus.citas.data.repository
 
 import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.model.Especialidad
+import com.saludplus.citas.data.model.Local
 import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.model.Usuario
 import com.saludplus.citas.util.diasHabiles
@@ -14,6 +15,18 @@ object Repositorio {
         Usuario("Lucas Inga Marin", "987654321", "lucas@tecsup.edu.pe", "123456")
     )
     var usuarioActual: Usuario? = null
+
+    // ---------- Locales (sedes en distintos distritos) ----------
+    val locales = listOf(
+        Local(1, "SaludPlus Miraflores", "Miraflores", "Av. Larco 345"),
+        Local(2, "SaludPlus San Isidro", "San Isidro", "Av. Javier Prado Oeste 1120"),
+        Local(3, "SaludPlus Surco", "Santiago de Surco", "Av. Primavera 850"),
+        Local(4, "SaludPlus Los Olivos", "Los Olivos", "Av. Los Olivos 123"),
+        Local(5, "SaludPlus San Juan de Lurigancho", "San Juan de Lurigancho", "Av. Proceres de la Independencia 1520"),
+        Local(6, "SaludPlus Ate", "Ate", "Av. Nicolas Ayllon 4580")
+    )
+    // local elegido: mientras sea null no se puede agendar una cita
+    var localActual: Local? = null
 
     // ---------- Especialidades ----------
     val especialidades = listOf(
@@ -48,7 +61,8 @@ object Repositorio {
     // ---------- Citas ----------
     // cita de otro paciente: ese horario ya no debe salir disponible
     val citas = mutableListOf(
-        Cita(1, "999888777", 4, diasHabiles(0)[1].toString(), "09:00", "Control")    )
+        Cita(1, "999888777", 4, diasHabiles(0)[1].toString(), "09:00", "Control")
+    )
     private var siguienteIdCita = 2
 
     // ================= FUNCIONES =================
@@ -70,6 +84,12 @@ object Repositorio {
 
     fun cerrarSesion() {
         usuarioActual = null
+        localActual = null
+    }
+
+    fun elegirLocal(localId: Int) {
+        // find: guarda el local elegido para usarlo al agendar
+        localActual = locales.find { it.id == localId }
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
@@ -121,7 +141,8 @@ object Repositorio {
         // any: si ese medico ya tiene una cita ese dia a esa hora, no se puede agendar
         if (citas.any { it.medicoId == medicoId && it.fecha == fecha && it.hora == hora }) return null
 
-        val cita = Cita(siguienteIdCita, usuario.telefono, medicoId, fecha, hora, motivo)
+        // la cita guarda tambien el local elegido
+        val cita = Cita(siguienteIdCita, usuario.telefono, medicoId, fecha, hora, motivo, localActual?.nombre ?: "")
         siguienteIdCita++
         citas.add(cita)
         return cita

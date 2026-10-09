@@ -11,6 +11,7 @@ object Rutas {
 
     // home
     const val HOME = "home"
+    const val LOCALES = "locales"
 
     // agendamiento (las que llevan {} reciben parametros)
     const val ESPECIALIDADES = "especialidades"

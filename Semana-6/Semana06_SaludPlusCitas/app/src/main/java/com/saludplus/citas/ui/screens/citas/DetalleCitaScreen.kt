@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
@@ -83,6 +84,7 @@ fun DetalleCitaScreen(navController: NavController, citaId: Int) {
                         FilaDato(Icons.Filled.Favorite, "Especialidad", especialidad?.nombre ?: "")
                         FilaDato(Icons.Filled.DateRange, "Fecha", textoFecha(cita.fecha))
                         FilaDato(Icons.Filled.Notifications, "Hora", cita.hora)
+                        FilaDato(Icons.Filled.LocationOn, "Local", cita.local)
                         FilaDato(Icons.Filled.Info, "Motivo", cita.motivo.ifBlank { "Sin motivo" })
                     }
                 }

@@ -43,6 +43,7 @@ import com.saludplus.citas.util.textoFecha
 @Composable
 fun ConfirmarCitaScreen(navController: NavController, medicoId: Int, fecha: String, hora: String) {
     val medico = Repositorio.obtenerMedico(medicoId)
+    val local = Repositorio.localActual
     var motivo by remember { mutableStateOf("") }
     var error by remember { mutableStateOf("") }
 
@@ -77,7 +78,9 @@ fun ConfirmarCitaScreen(navController: NavController, medicoId: Int, fecha: Stri
                     FilaDato(Icons.Filled.DateRange, "Fecha", textoFecha(fecha))
                     FilaDato(Icons.Filled.Notifications, "Hora", "$hora a $horaFin")
                     FilaDato(Icons.Filled.Person, "Tipo de atencion", "Consulta presencial")
-                    FilaDato(Icons.Filled.LocationOn, "Direccion", "Av. Los Olivos 123, Lima")
+                    // la direccion ahora sale del local elegido
+                    FilaDato(Icons.Filled.LocationOn, "Local", local?.nombre ?: "")
+                    FilaDato(Icons.Filled.LocationOn, "Direccion", "${local?.direccion ?: ""}, ${local?.distrito ?: ""}")
                 }
             }
 

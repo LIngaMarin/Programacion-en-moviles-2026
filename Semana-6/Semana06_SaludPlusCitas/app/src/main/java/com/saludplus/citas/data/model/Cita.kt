@@ -6,5 +6,7 @@ data class Cita(
     val medicoId: Int,
     val fecha: String,
     val hora: String,
-    val motivo: String
+    val motivo: String,
+    // sede donde se atiende la cita
+    val local: String = ""
 )

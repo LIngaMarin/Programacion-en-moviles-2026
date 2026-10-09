@@ -18,6 +18,7 @@ import com.saludplus.citas.ui.screens.auth.TerminosScreen
 import com.saludplus.citas.ui.screens.citas.DetalleCitaScreen
 import com.saludplus.citas.ui.screens.citas.MisCitasScreen
 import com.saludplus.citas.ui.screens.home.HomeScreen
+import com.saludplus.citas.ui.screens.locales.LocalesScreen
 import com.saludplus.citas.ui.screens.notificaciones.NotificacionesScreen
 import com.saludplus.citas.ui.screens.perfil.PerfilScreen
 import com.saludplus.citas.ui.screens.resultados.ResultadosScreen
@@ -38,6 +39,7 @@ fun AppNavigation() {
 
         // home
         composable(Rutas.HOME) { HomeScreen(navController) }
+        composable(Rutas.LOCALES) { LocalesScreen(navController) }
 
         // agendamiento: cada pantalla recibe el parametro que eligio la anterior
         composable(Rutas.ESPECIALIDADES) { EspecialidadesScreen(navController) }

@@ -75,7 +75,7 @@ fun MisCitasScreen(navController: NavController) {
                 Text("Aun no tienes citas", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text("Agenda tu primera cita con un especialista", color = TextoGris)
                 Spacer(Modifier.height(24.dp))
-                BotonPrimario("Agendar cita") { navController.navigate(Rutas.ESPECIALIDADES) }
+                BotonPrimario("Elegir local") { navController.navigate(Rutas.LOCALES) }
             }
         } else {
             LazyColumn(
