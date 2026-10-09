@@ -111,9 +111,10 @@ fun RegistroScreen(navController: NavController) {
                     else -> ""
                 }
                 if (error.isEmpty()) {
-                    // popUpTo: al presionar Atras desde Inicio ya no se vuelve al registro
-                    navController.navigate(Rutas.HOME) {
-                        popUpTo(Rutas.SPLASH) { inclusive = true }
+                    // ya registrado: debe iniciar sesion, asi que va al Login y el registro sale del historial
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.REGISTRO) { inclusive = true }
+                        launchSingleTop = true
                     }
                 }
             }

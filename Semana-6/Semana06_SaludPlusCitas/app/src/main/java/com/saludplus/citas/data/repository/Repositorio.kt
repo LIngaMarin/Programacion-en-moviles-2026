@@ -56,10 +56,8 @@ object Repositorio {
     fun registrarUsuario(nombres: String, telefono: String, correo: String, contrasena: String): Boolean {
         // any: revisa si ya hay alguien con ese telefono
         if (usuarios.any { it.telefono == telefono }) return false
-        val nuevo = Usuario(nombres, telefono, correo, contrasena)
-        usuarios.add(nuevo)
-        // al registrarse ya queda con la sesion iniciada
-        usuarioActual = nuevo
+        // solo se guarda el usuario; la sesion se inicia despues en el Login
+        usuarios.add(Usuario(nombres, telefono, correo, contrasena))
         return true
     }
 
