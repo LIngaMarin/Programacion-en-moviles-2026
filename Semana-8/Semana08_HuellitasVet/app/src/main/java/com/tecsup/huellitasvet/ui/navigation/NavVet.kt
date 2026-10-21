@@ -48,6 +48,10 @@ import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
 import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import com.tecsup.huellitasvet.viewmodel.PanelViewModel
+import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
+import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
+import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 
 /**
  * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
@@ -229,8 +233,37 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     val vm = vetViewModel { app -> AgendaViewModel(app.repository) }
                     AgendaScreen(
                         vm = vm,
-                        onAtender = { /* TODO (Paso 12): abrir atender cita */ }
+                        onAtender = { id -> navController.navigate(Rutas.atenderCita(id)) }                    )
+                }
+            }
+            composable(Rutas.PACIENTES) {
+                PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.PACIENTES) {
+                    val vm = vetViewModel { app -> PacientesViewModel(app.repository) }
+                    PacientesScreen(
+                        vm = vm,
+                        onVerPaciente = { id -> navController.navigate(Rutas.fichaPaciente(id)) }
                     )
+                }
+            }
+            // Ficha del paciente: la misma ficha del dueño, pero sin "Pedir cita" ni "Editar"
+            composable(
+                Rutas.FICHA_PACIENTE,
+                arguments = listOf(navArgument("mascotaId") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("mascotaId") ?: 0
+                PantallaVeterinario(navController, oscuro) {
+                    val vm = vetViewModel(key = "paciente-$id") { app -> MascotaViewModel(app.repository, id, 0) }
+                    FichaMascotaScreen(vm = vm, onVolver = { navController.popBackStack() })
+                }
+            }
+            composable(
+                Rutas.ATENDER_CITA,
+                arguments = listOf(navArgument("citaId") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("citaId") ?: 0
+                PantallaVeterinario(navController, oscuro) {
+                    val vm = vetViewModel(key = "atender-$id") { app -> AtenderCitaViewModel(app.repository, id) }
+                    AtenderCitaScreen(vm = vm, onVolver = { navController.popBackStack() })
                 }
             }
             composable(Rutas.SERVICIOS) {
