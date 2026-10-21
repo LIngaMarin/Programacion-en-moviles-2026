@@ -24,10 +24,13 @@ import com.tecsup.huellitasvet.ui.components.BarraInferior
 import com.tecsup.huellitasvet.ui.components.OpcionBarra
 import com.tecsup.huellitasvet.ui.components.opcionesDueno
 import com.tecsup.huellitasvet.ui.components.opcionesVeterinario
+import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
+import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -42,6 +45,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
     val sesion = vetViewModel { app -> SesionViewModel(app.repository, app.preferencias) }
     val oscuro by sesion.modoOscuro.collectAsState()
     val perfilGuardado by sesion.perfilGuardado.collectAsState()
+    val usuario by sesion.usuarioActual.collectAsState()
 
     NavHost(navController = navController, startDestination = Rutas.SPLASH) {
 
@@ -76,8 +80,35 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
         navigation(startDestination = Rutas.INICIO, route = Rutas.GRAFO_DUENO) {
             composable(Rutas.INICIO) {
                 PantallaDueno(navController, oscuro, rutaBarra = Rutas.INICIO) {
-                    // TODO (Paso 7): InicioScreen
-                    PantallaPendiente("Inicio del dueño (Paso 7)")
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        val vm = vetViewModel(key = "inicio-${u.id}") { app -> InicioViewModel(app.repository, u.id) }
+                        InicioScreen(
+                            vm = vm,
+                            nombre = u.nombre,
+                            onVerMascota = { /* TODO (Paso 8): abrir la ficha de la mascota */ },
+                            onAgregarMascota = { /* TODO (Paso 8): abrir el formulario de mascota */ },
+                            onVerTodas = { irATab(navController, Rutas.MASCOTAS, Rutas.INICIO) },
+                            onPedirCita = { /* TODO (Paso 9): abrir pedir cita */ }
+                        )
+                    }
+                }
+            }
+            composable(Rutas.MASCOTAS) {
+                PantallaDueno(navController, oscuro, rutaBarra = Rutas.MASCOTAS) {
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        val vm = vetViewModel(key = "mascotas-${u.id}") { app -> InicioViewModel(app.repository, u.id) }
+                        MascotasScreen(
+                            vm = vm,
+                            onVerMascota = { /* TODO (Paso 8): abrir la ficha de la mascota */ },
+                            onAgregar = { /* TODO (Paso 8): abrir el formulario de mascota */ }
+                        )
+                    }
                 }
             }
         }
@@ -109,6 +140,15 @@ private fun irAGrafo(navController: NavHostController, grafo: String) {
     navController.navigate(grafo) {
         popUpTo(navController.graph.id) { inclusive = true }
         launchSingleTop = true
+    }
+}
+
+/** Cambia de opcion de la barra inferior sin apilar pantallas repetidas. */
+private fun irATab(navController: NavHostController, ruta: String, rutaInicio: String) {
+    navController.navigate(ruta) {
+        popUpTo(rutaInicio) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 
@@ -155,11 +195,7 @@ private fun ConBarra(
                 // Solo navega si esa pantalla ya existe en el grafo (las demas se agregan en los siguientes pasos)
                 val grafo = navController.currentBackStackEntry?.destination?.parent
                 if (grafo?.findNode(ruta) != null) {
-                    navController.navigate(ruta) {
-                        popUpTo(opciones.first().ruta) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    irATab(navController, ruta, opciones.first().ruta)
                 }
             })
         },

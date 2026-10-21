@@ -28,3 +28,14 @@ fun soles(monto: Double): String = String.format(Locale.US, "S/ %,.2f", monto)
 
 /** 4.3 -> "4.3 kg" */
 fun kilos(peso: Double): String = String.format(Locale.US, "%.1f kg", peso)
+
+
+/** Edad de la mascota: año actual - año de nacimiento. 2023 -> "3 años" */
+fun edad(anioNacimiento: Int): String {
+    val anios = LocalDate.now().year - anioNacimiento
+    return when {
+        anios <= 0 -> "Menos de 1 año"
+        anios == 1 -> "1 año"
+        else -> "$anios años"
+    }
+}
