@@ -15,6 +15,7 @@ object Rutas {
     const val FORMULARIO_MASCOTA = "formulario_mascota?mascotaId={mascotaId}"
     const val FICHA_MASCOTA = "ficha_mascota/{mascotaId}"
     const val PEDIR_CITA = "pedir_cita?mascotaId={mascotaId}"
+    const val REPROGRAMAR_CITA = "reprogramar_cita/{citaId}"
     const val MIS_CITAS = "mis_citas"
     const val PERFIL = "perfil"
 
@@ -37,6 +38,8 @@ object Rutas {
 
     fun pedirCita(mascotaId: Int? = null) =
         if (mascotaId == null) "pedir_cita" else "pedir_cita?mascotaId=$mascotaId"
+
+    fun reprogramarCita(citaId: Int) = "reprogramar_cita/$citaId"
 
     fun atenderCita(citaId: Int) = "atender_cita/$citaId"
 

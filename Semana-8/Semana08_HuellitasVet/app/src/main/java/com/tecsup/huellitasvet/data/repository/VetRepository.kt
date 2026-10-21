@@ -49,6 +49,7 @@ interface VetRepository {
     fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
     fun observarPesos(mascotaId: Int): Flow<List<PuntoPeso>>
     suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita)
+    suspend fun reprogramarCita(citaId: Int, fecha: String, hora: String)
     suspend fun registrarAtencion(citaId: Int, diagnostico: String,
                                   tratamiento: String, peso: Double)
 

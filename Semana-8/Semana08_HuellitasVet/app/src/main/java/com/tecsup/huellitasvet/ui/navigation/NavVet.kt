@@ -34,6 +34,7 @@ import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
+import com.tecsup.huellitasvet.ui.dueno.ReprogramarCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
@@ -51,6 +52,7 @@ import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
+import com.tecsup.huellitasvet.viewmodel.ReprogramarCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -147,7 +149,8 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                         val vm = vetViewModel(key = "mis-citas-${u.id}") { app -> MisCitasViewModel(app.repository, u.id) }
                         MisCitasScreen(
                             vm = vm,
-                            onPedirCita = { navController.navigate(Rutas.pedirCita()) }
+                            onPedirCita = { navController.navigate(Rutas.pedirCita()) },
+                            onReprogramar = { citaId -> navController.navigate(Rutas.reprogramarCita(citaId)) }
                         )
                     }
                 }
@@ -244,6 +247,23 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                             }
                         )
                     }
+                }
+            }
+            // Reprogramar cita: sin barra inferior
+            composable(
+                Rutas.REPROGRAMAR_CITA,
+                arguments = listOf(navArgument("citaId") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("citaId") ?: 0
+                PantallaDueno(navController, oscuro) {
+                    val vm = vetViewModel(key = "reprogramar-$id") { app ->
+                        ReprogramarCitaViewModel(app.repository, id)
+                    }
+                    ReprogramarCitaScreen(
+                        vm = vm,
+                        onVolver = { navController.popBackStack() },
+                        onListo = { navController.popBackStack() }
+                    )
                 }
             }
         }

@@ -55,7 +55,8 @@ import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 @Composable
 fun MisCitasScreen(
     vm: MisCitasViewModel,
-    onPedirCita: () -> Unit
+    onPedirCita: () -> Unit,
+    onReprogramar: (Int) -> Unit
 ) {
     val proximas by vm.proximas.collectAsState()
     val historial by vm.historial.collectAsState()
@@ -97,7 +98,11 @@ fun MisCitasScreen(
                 }
             }
             items(lista, key = { it.detalle.cita.id }) { item ->
-                TarjetaCita(item, onCancelar = { porCancelar = item.detalle })
+                TarjetaCita(
+                    item = item,
+                    onCancelar = { porCancelar = item.detalle },
+                    onReprogramar = { onReprogramar(item.detalle.cita.id) }
+                )
             }
 
             if (pestana == 0) {
@@ -148,7 +153,11 @@ fun MisCitasScreen(
 }
 
 @Composable
-private fun TarjetaCita(item: CitaItem, onCancelar: () -> Unit) {
+private fun TarjetaCita(
+    item: CitaItem,
+    onCancelar: () -> Unit,
+    onReprogramar: () -> Unit
+) {
     val c = item.detalle
     val estado = EstadoCita.de(c.cita.estado)
     val activa = estado == EstadoCita.PENDIENTE || estado == EstadoCita.CONFIRMADA
@@ -162,7 +171,12 @@ private fun TarjetaCita(item: CitaItem, onCancelar: () -> Unit) {
             else -> soles(c.cita.precio)
         },
         accion = if (item.puedeCancelar) {
-            { AccionTexto("Cancelar", onClick = onCancelar, peligro = true) }
+            {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    AccionTexto("Reprogramar", onClick = onReprogramar, peligro = false)
+                    AccionTexto("Cancelar", onClick = onCancelar, peligro = true)
+                }
+            }
         } else null
     )
 }
