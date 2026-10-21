@@ -1,18 +1,22 @@
 package com.tecsup.huellitasvet.data.repository
 
+import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
+import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
+import com.tecsup.huellitasvet.model.ConteoServicio
+import com.tecsup.huellitasvet.model.EstadoCita
 import kotlinx.coroutines.flow.Flow
 
 /**
- * ENTREGADO. El contrato del Repository: los ViewModels solo conocen esta interface.
+ * El contrato del Repository: los ViewModels solo conocen esta interface.
  * Hoy la implementa VetRepositoryRoom (Room); mas adelante se podra implementar con
  * un servicio web sin cambiar ViewModels ni pantallas.
- *
- * Las funciones de usuarios, mascotas, citas y panel usan clases que se crean en los
- * Pasos 1 y 2 (Usuario, Mascota, Cita, MascotaConDueno, CitaConDetalle). Por eso estan
- * comentadas: en el Paso 4 se descomentan y se implementan en VetRepositoryRoom.
  */
 interface VetRepository {
+    // Usuarios
+    suspend fun login(correo: String, clave: String): Usuario?
 
     // Servicios (ejemplo resuelto)
     fun observarServicios(): Flow<List<Servicio>>
@@ -21,11 +25,6 @@ interface VetRepository {
     suspend fun eliminarServicio(s: Servicio)
     suspend fun cambiarActivo(id: Int, activo: Boolean)
     suspend fun servicioTieneCitas(id: Int): Boolean
-
-    // TODO (Paso 4): descomentar cuando existan las entidades y relaciones
-    /*
-    // Usuarios
-    suspend fun login(correo: String, clave: String): Usuario?
 
     // Mascotas
     fun observarMascotasDeDueno(duenoId: Int): Flow<List<Mascota>>
@@ -52,5 +51,4 @@ interface VetRepository {
     fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int>
     fun observarCitasPorServicio(): Flow<List<ConteoServicio>>
     fun observarIngresosDesde(fechaInicio: String): Flow<Double>
-    */
 }

@@ -1,20 +1,34 @@
 package com.tecsup.huellitasvet.data.repository
 
+import androidx.room.withTransaction
 import com.tecsup.huellitasvet.data.local.VetDatabase
+import com.tecsup.huellitasvet.data.local.entity.Cita
+import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
+import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
+import com.tecsup.huellitasvet.model.ConteoServicio
+import com.tecsup.huellitasvet.model.EstadoCita
 import kotlinx.coroutines.flow.Flow
 
 /**
- * GUIADO. Implementacion del Repository con Room.
- * Las funciones de Servicio ya estan hechas (ejemplo resuelto); el resto se completa en el Paso 4.
+ * Implementacion del Repository con Room.
+ * observar*: solo delegan en los DAOs y devuelven Flow (sin suspend).
+ * Escrituras y acciones unicas: suspend.
  */
 class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     private val servicioDao = db.servicioDao()
-    // TODO (Paso 4): usuarioDao, mascotaDao y citaDao
+    private val usuarioDao = db.usuarioDao()
+    private val mascotaDao = db.mascotaDao()
+    private val citaDao = db.citaDao()
+
+    // ---------- Usuarios ----------
+    override suspend fun login(correo: String, clave: String): Usuario? =
+        usuarioDao.login(correo, clave)
 
     // ---------- Servicios (ejemplo resuelto) ----------
-    // observar*: solo delegan en el DAO, sin suspend
     override fun observarServicios(): Flow<List<Servicio>> = servicioDao.observarTodos()
 
     override fun observarServiciosActivos(): Flow<List<Servicio>> = servicioDao.observarActivos()
@@ -32,10 +46,94 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
         servicioDao.cambiarActivo(id, activo)
     }
 
-    override suspend fun servicioTieneCitas(id: Int): Boolean {
-        // TODO (Paso 4): devolver true si el CitaDao cuenta citas de este servicio (> 0)
-        TODO("Paso 4")
+    override suspend fun servicioTieneCitas(id: Int): Boolean =
+        citaDao.contarPorServicioId(id) > 0
+
+    // ---------- Mascotas ----------
+    override fun observarMascotasDeDueno(duenoId: Int): Flow<List<Mascota>> =
+        mascotaDao.observarPorDueno(duenoId)
+
+    override fun observarMascota(id: Int): Flow<Mascota?> = mascotaDao.observarUna(id)
+
+    override fun observarTodasLasMascotas(): Flow<List<MascotaConDueno>> = mascotaDao.observarTodas()
+
+    // id = 0 -> mascota nueva (insertar); id > 0 -> editar (actualizar)
+    override suspend fun guardarMascota(m: Mascota) {
+        if (m.id == 0) mascotaDao.insertar(m) else mascotaDao.actualizar(m)
     }
 
-    // TODO (Paso 4): implementar las demas funciones de VetRepository
+    override suspend fun eliminarMascota(m: Mascota) {
+        mascotaDao.eliminar(m)
+    }
+
+    override suspend fun mascotaTieneCitas(id: Int): Boolean =
+        mascotaDao.contarCitas(id) > 0
+
+    // ---------- Citas ----------
+    override fun observarHorasOcupadas(fecha: String): Flow<List<String>> =
+        citaDao.observarHorasOcupadas(fecha)
+
+    override suspend fun crearCita(
+        mascotaId: Int,
+        servicioId: Int,
+        fecha: String,
+        hora: String,
+        nota: String
+    ): Long {
+        // Se copia el precio del servicio en este momento (la "foto" del precio)
+        val servicio = servicioDao.obtener(servicioId) ?: return -1L
+        val cita = Cita(
+            mascotaId = mascotaId,
+            servicioId = servicioId,
+            fecha = fecha,
+            hora = hora,
+            nota = nota,
+            estado = EstadoCita.PENDIENTE.name,
+            precio = servicio.precio,
+            fechaCreacion = System.currentTimeMillis()
+        )
+        return citaDao.insertar(cita)
+    }
+
+    override fun observarCitasDeDueno(duenoId: Int): Flow<List<CitaConDetalle>> =
+        citaDao.observarPorDueno(duenoId)
+
+    override fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>> =
+        citaDao.observarPorFecha(fecha)
+
+    override fun observarCita(id: Int): Flow<CitaConDetalle?> = citaDao.observarUna(id)
+
+    override fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>> =
+        citaDao.observarHistorial(mascotaId)
+
+    // En la tabla se guarda el texto del enum (estado.name)
+    override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) {
+        citaDao.actualizarEstado(id, estado.name)
+    }
+
+    // Transaccion: la cita pasa a ATENDIDA y el peso de la mascota se actualiza juntos.
+    // Si algo falla dentro, Room deshace todo y no queda nada a medias.
+    override suspend fun registrarAtencion(
+        citaId: Int,
+        diagnostico: String,
+        tratamiento: String,
+        peso: Double
+    ) {
+        db.withTransaction {
+            val cita = citaDao.obtener(citaId) ?: return@withTransaction
+            citaDao.registrarAtencion(citaId, diagnostico, tratamiento, peso)
+            mascotaDao.actualizarPeso(cita.mascotaId, peso)
+        }
+    }
+
+    // ---------- Panel ----------
+    override fun observarCitasDeFecha(fecha: String): Flow<Int> = citaDao.contarPorFecha(fecha)
+
+    override fun observarCantidadPorEstado(estado: EstadoCita): Flow<Int> =
+        citaDao.contarPorEstado(estado.name)
+
+    override fun observarCitasPorServicio(): Flow<List<ConteoServicio>> = citaDao.contarPorServicio()
+
+    override fun observarIngresosDesde(fechaInicio: String): Flow<Double> =
+        citaDao.ingresosDesde(fechaInicio)
 }
