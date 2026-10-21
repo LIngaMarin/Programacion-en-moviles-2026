@@ -10,6 +10,7 @@ import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.model.ConteoServicio
 import com.tecsup.huellitasvet.model.EstadoCita
+import com.tecsup.huellitasvet.model.PuntoPeso
 import kotlinx.coroutines.flow.Flow
 import com.tecsup.huellitasvet.model.Rol
 
@@ -110,6 +111,9 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>> =
         citaDao.observarHistorial(mascotaId)
+
+    override fun observarPesos(mascotaId: Int): Flow<List<PuntoPeso>> =
+        citaDao.observarPesos(mascotaId)
 
     // En la tabla se guarda el texto del enum (estado.name)
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) {

@@ -6,6 +6,7 @@ import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.repository.VetRepository
 import com.tecsup.huellitasvet.model.Especie
+import com.tecsup.huellitasvet.model.PuntoPeso
 import com.tecsup.huellitasvet.model.Sexo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +46,11 @@ class MascotaViewModel(
     /** Historial clinico: citas ATENDIDAS de la mascota, la mas reciente primero (lo ordena el DAO). */
     val historial: StateFlow<List<CitaConDetalle>> =
         (if (mascotaId != null) repo.observarHistorial(mascotaId) else flowOf(emptyList()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /** Registro de pesos en citas ATENDIDAS de la mascota, ordenados cronológicamente. */
+    val pesos: StateFlow<List<PuntoPeso>> =
+        (if (mascotaId != null) repo.observarPesos(mascotaId) else flowOf(emptyList()))
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _errores = MutableStateFlow(ErroresMascota())

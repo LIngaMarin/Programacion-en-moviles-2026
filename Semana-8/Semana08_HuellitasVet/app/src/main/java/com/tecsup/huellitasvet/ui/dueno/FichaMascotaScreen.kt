@@ -40,12 +40,14 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.model.Especie
+import com.tecsup.huellitasvet.model.PuntoPeso
 import com.tecsup.huellitasvet.model.Sexo
 import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.HistorialItem
 import com.tecsup.huellitasvet.ui.components.MascotaAvatar
 import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.edad
+import com.tecsup.huellitasvet.ui.components.graficos.GraficoLineas
 import com.tecsup.huellitasvet.ui.components.kilos
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 
@@ -62,6 +64,7 @@ fun FichaMascotaScreen(
 ) {
     val mascota by vm.mascota.collectAsState()
     val historial by vm.historial.collectAsState()
+    val pesos by vm.pesos.collectAsState()
     var pestana by rememberSaveable { mutableIntStateOf(1) }   // 0 = Datos, 1 = Historial clinico
 
     Scaffold(
@@ -99,7 +102,7 @@ fun FichaMascotaScreen(
                 Pestanas(seleccionada = pestana, onCambiar = { pestana = it })
                 Spacer(Modifier.height(14.dp))
 
-                if (pestana == 0) Datos(m) else Historial(historial)
+                if (pestana == 0) Datos(m) else Historial(historial = historial, pesos = pesos)
             }
         }
     }
@@ -195,23 +198,45 @@ private fun Datos(m: Mascota) {
 }
 
 @Composable
-private fun Historial(historial: List<CitaConDetalle>) {
-    if (historial.isEmpty()) {
-        Text(
-            "Aún no tiene atenciones",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-        )
-    } else {
-        historial.forEachIndexed { i, c ->
-            HistorialItem(
-                fecha = c.cita.fecha,
-                servicio = c.servicio.nombre,
-                diagnostico = c.cita.diagnostico,
-                tratamiento = c.cita.tratamiento,
-                peso = c.cita.pesoRegistrado,
-                esUltimo = i == historial.lastIndex
+private fun Historial(historial: List<CitaConDetalle>, pesos: List<PuntoPeso>) {
+    Column {
+        if (pesos.size >= 2) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        "Evolución del peso",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    GraficoLineas(puntos = pesos)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        if (historial.isEmpty()) {
+            Text(
+                "Aún no tiene atenciones",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
             )
+        } else {
+            historial.forEachIndexed { i, c ->
+                HistorialItem(
+                    fecha = c.cita.fecha,
+                    servicio = c.servicio.nombre,
+                    diagnostico = c.cita.diagnostico,
+                    tratamiento = c.cita.tratamiento,
+                    peso = c.cita.pesoRegistrado,
+                    esUltimo = i == historial.lastIndex
+                )
+            }
         }
     }
 }
