@@ -36,22 +36,24 @@ import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
+import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.AjustesScreen
+import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.tecsup.huellitasvet.ui.veterinario.FormularioServicioScreen
+import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
+import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
+import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
+import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
+import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
-import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
-import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
-import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
-import com.tecsup.huellitasvet.viewmodel.PanelViewModel
-import com.tecsup.huellitasvet.ui.veterinario.AtenderCitaScreen
-import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
-import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
-import com.tecsup.huellitasvet.viewmodel.PacientesViewModel
 
 /**
  * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
@@ -62,8 +64,18 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
     // Un solo SesionViewModel para toda la app (se crea fuera del NavHost)
     val sesion = vetViewModel { app -> SesionViewModel(app.repository, app.preferencias) }
     val oscuro by sesion.modoOscuro.collectAsState()
+    val notificaciones by sesion.notificaciones.collectAsState()
+    val aceptarCitas by sesion.aceptarCitas.collectAsState()
     val perfilGuardado by sesion.perfilGuardado.collectAsState()
     val usuario by sesion.usuarioActual.collectAsState()
+
+    // Acciones compartidas por Perfil (dueño) y Ajustes (veterinario)
+    val cambiarPerfil: () -> Unit = {
+        sesion.cambiarPerfil { rol -> irAGrafo(navController, grafoDe(rol)) }
+    }
+    val cerrarSesion: () -> Unit = {
+        sesion.cerrarSesion { irAGrafo(navController, Rutas.LOGIN) }
+    }
 
     NavHost(navController = navController, startDestination = Rutas.SPLASH) {
 
@@ -87,10 +99,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
             LoginScreen(
                 vm = sesion,
                 oscuro = oscuro,
-                onIngresar = { rol ->
-                    val grafo = if (rol == Rol.CLIENTE) Rutas.GRAFO_DUENO else Rutas.GRAFO_VETERINARIO
-                    irAGrafo(navController, grafo)
-                }
+                onIngresar = { rol -> irAGrafo(navController, grafoDe(rol)) }
             )
         }
 
@@ -145,8 +154,30 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
             }
             composable(Rutas.PERFIL) {
                 PantallaDueno(navController, oscuro, rutaBarra = Rutas.PERFIL) {
-                    // TODO (Paso 13): perfil completo
-                    PerfilScreen(nombre = usuario?.nombre ?: "", correo = usuario?.correo ?: "")
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        // Contadores: mascotas (InicioViewModel), proximas y atenciones (MisCitasViewModel)
+                        val vmInicio = vetViewModel(key = "perfil-inicio-${u.id}") { app -> InicioViewModel(app.repository, u.id) }
+                        val vmCitas = vetViewModel(key = "perfil-citas-${u.id}") { app -> MisCitasViewModel(app.repository, u.id) }
+                        val mascotas by vmInicio.mascotas.collectAsState()
+                        val proximas by vmCitas.proximas.collectAsState()
+                        val atenciones by vmCitas.atenciones.collectAsState()
+                        PerfilScreen(
+                            nombre = u.nombre,
+                            correo = u.correo,
+                            mascotas = mascotas.size,
+                            proximas = proximas.size,
+                            atenciones = atenciones,
+                            modoOscuro = oscuro,
+                            recordatorios = notificaciones,
+                            onModoOscuro = { sesion.cambiarModoOscuro(it) },
+                            onRecordatorios = { sesion.cambiarNotificaciones(it) },
+                            onCambiarPerfil = cambiarPerfil,
+                            onCerrarSesion = cerrarSesion
+                        )
+                    }
                 }
             }
             // Formulario: sin id = nueva mascota; con id = editar
@@ -199,19 +230,19 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                         PantallaPendiente("Cargando…")
                     } else {
                         val vm = vetViewModel(key = "pedir-cita-$id") { app ->
-                            PedirCitaViewModel(app.repository, u.id, if (id == -1) null else id)
+                            PedirCitaViewModel(app.repository, app.preferencias, u.id, if (id == -1) null else id)
                         }
                         PedirCitaScreen(
                             vm = vm,
                             onVolver = { navController.popBackStack() },
-                            // Al crear la cita vuelve a Mis citas (ahi aparece como PENDIENTE)
                             onCreada = {
                                 // Ir a Mis citas sin restaurar la pila guardada (asi no vuelve a Pedir cita)
                                 navController.navigate(Rutas.MIS_CITAS) {
                                     popUpTo(Rutas.INICIO)
                                     launchSingleTop = true
                                 }
-                            }                        )
+                            }
+                        )
                     }
                 }
             }
@@ -233,7 +264,8 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     val vm = vetViewModel { app -> AgendaViewModel(app.repository) }
                     AgendaScreen(
                         vm = vm,
-                        onAtender = { id -> navController.navigate(Rutas.atenderCita(id)) }                    )
+                        onAtender = { id -> navController.navigate(Rutas.atenderCita(id)) }
+                    )
                 }
             }
             composable(Rutas.PACIENTES) {
@@ -271,8 +303,39 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
                     ServiciosScreen(
                         vm = vm,
-                        onEditar = { /* TODO (Paso 13): abrir el formulario de servicio */ },
-                        onNuevo = { /* TODO (Paso 13): abrir el formulario de servicio */ }
+                        onEditar = { id -> navController.navigate(Rutas.formularioServicio(id)) },
+                        onNuevo = { navController.navigate(Rutas.formularioServicio()) }
+                    )
+                }
+            }
+            // Formulario de servicio: sin id = nuevo; con id = editar
+            composable(
+                Rutas.FORMULARIO_SERVICIO,
+                arguments = listOf(navArgument("servicioId") { type = NavType.IntType; defaultValue = -1 })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("servicioId") ?: -1
+                PantallaVeterinario(navController, oscuro) {
+                    val vm = vetViewModel(key = "form-servicio-$id") { app -> ServiciosViewModel(app.repository) }
+                    FormularioServicioScreen(
+                        vm = vm,
+                        servicioId = if (id == -1) null else id,
+                        onVolver = { navController.popBackStack() }
+                    )
+                }
+            }
+            composable(Rutas.AJUSTES) {
+                PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.AJUSTES) {
+                    AjustesScreen(
+                        nombre = usuario?.nombre ?: "",
+                        correo = usuario?.correo ?: "",
+                        modoOscuro = oscuro,
+                        notificaciones = notificaciones,
+                        aceptarCitas = aceptarCitas,
+                        onModoOscuro = { sesion.cambiarModoOscuro(it) },
+                        onNotificaciones = { sesion.cambiarNotificaciones(it) },
+                        onAceptarCitas = { sesion.cambiarAceptarCitas(it) },
+                        onCambiarPerfil = cambiarPerfil,
+                        onCerrarSesion = cerrarSesion
                     )
                 }
             }
@@ -280,9 +343,13 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
     }
 }
 
-/** Navega al grafo de un perfil y limpia toda la pila: con "atras" no se vuelve al login. */
-private fun irAGrafo(navController: NavHostController, grafo: String) {
-    navController.navigate(grafo) {
+/** Grafo principal de cada perfil. */
+private fun grafoDe(rol: Rol): String =
+    if (rol == Rol.CLIENTE) Rutas.GRAFO_DUENO else Rutas.GRAFO_VETERINARIO
+
+/** Navega a un destino y limpia toda la pila (popUpTo del grafo raiz): con "atras" no se vuelve. */
+private fun irAGrafo(navController: NavHostController, destino: String) {
+    navController.navigate(destino) {
         popUpTo(navController.graph.id) { inclusive = true }
         launchSingleTop = true
     }
@@ -337,11 +404,7 @@ private fun ConBarra(
     Scaffold(
         bottomBar = {
             BarraInferior(opciones = opciones, rutaActual = rutaActual, onNavegar = { ruta ->
-                // Solo navega si esa pantalla ya existe en el grafo (las demas se agregan en los siguientes pasos)
-                val grafo = navController.currentBackStackEntry?.destination?.parent
-                if (grafo?.findNode(ruta) != null) {
-                    irATab(navController, ruta, opciones.first().ruta)
-                }
+                irATab(navController, ruta, opciones.first().ruta)
             })
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -357,7 +420,7 @@ private fun ConBarra(
     }
 }
 
-/** Texto temporal para las pantallas que se hacen en los siguientes pasos. */
+/** Texto mientras carga el usuario de la sesion. */
 @Composable
 private fun PantallaPendiente(texto: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

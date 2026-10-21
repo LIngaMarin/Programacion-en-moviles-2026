@@ -11,6 +11,7 @@ import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.model.ConteoServicio
 import com.tecsup.huellitasvet.model.EstadoCita
 import kotlinx.coroutines.flow.Flow
+import com.tecsup.huellitasvet.model.Rol
 
 /**
  * Implementacion del Repository con Room.
@@ -29,6 +30,8 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
         usuarioDao.login(correo, clave)
 
     override suspend fun obtenerUsuario(id: Int): Usuario? = usuarioDao.obtener(id)
+
+    override suspend fun obtenerUsuarioPorRol(rol: Rol): Usuario? = usuarioDao.obtenerPorRol(rol.name)
 
     // ---------- Servicios (ejemplo resuelto) ----------
     override fun observarServicios(): Flow<List<Servicio>> = servicioDao.observarTodos()

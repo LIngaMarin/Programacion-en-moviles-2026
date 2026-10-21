@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Sesion de la app: quien inicio sesion, con que perfil, y el modo oscuro.
+ * Sesion de la app: quien inicio sesion, con que perfil, y las preferencias guardadas en DataStore.
  * Las validaciones del login viven aqui (no en la pantalla).
  */
 class SesionViewModel(
@@ -29,8 +29,15 @@ class SesionViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    // ---------- Preferencias (DataStore) ----------
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val notificaciones: StateFlow<Boolean> = prefs.notificaciones
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val aceptarCitas: StateFlow<Boolean> = prefs.aceptarCitas
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     // Perfil guardado en DataStore: null = todavia cargando, "" = sin sesion, CLIENTE o ADMIN
     val perfilGuardado: StateFlow<String?> = prefs.perfilActivo
@@ -76,5 +83,39 @@ class SesionViewModel(
 
     fun limpiarError() {
         _error.value = null
+    }
+
+    // ---------- Ajustes ----------
+    fun cambiarModoOscuro(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarModoOscuro(activo) }
+    }
+
+    fun cambiarNotificaciones(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarNotificaciones(activo) }
+    }
+
+    fun cambiarAceptarCitas(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarAceptarCitas(activo) }
+    }
+
+    /** Cambia al otro perfil (modo practica): guarda el otro rol en DataStore y avisa a cual ir. */
+    fun cambiarPerfil(onCambiado: (Rol) -> Unit) {
+        val actual = Rol.de(_usuarioActual.value?.rol) ?: return
+        val otro = if (actual == Rol.CLIENTE) Rol.ADMIN else Rol.CLIENTE
+        viewModelScope.launch {
+            val usuario = repo.obtenerUsuarioPorRol(otro) ?: return@launch
+            _usuarioActual.value = usuario
+            prefs.guardarSesion(otro, usuario.id)
+            onCambiado(otro)
+        }
+    }
+
+    /** Borra la sesion de DataStore (el modo oscuro se mantiene). */
+    fun cerrarSesion(onCerrada: () -> Unit) {
+        viewModelScope.launch {
+            prefs.cerrarSesion()
+            _usuarioActual.value = null
+            onCerrada()
+        }
     }
 }

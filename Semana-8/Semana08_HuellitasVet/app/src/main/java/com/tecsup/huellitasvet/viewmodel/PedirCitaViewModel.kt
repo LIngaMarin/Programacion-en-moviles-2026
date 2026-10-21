@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.prefs.PreferenciasStore
 import com.tecsup.huellitasvet.data.repository.VetRepository
 import com.tecsup.huellitasvet.model.Horarios
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,9 +27,14 @@ import java.time.LocalTime
 @OptIn(ExperimentalCoroutinesApi::class)
 class PedirCitaViewModel(
     private val repo: VetRepository,
+    prefs: PreferenciasStore,
     duenoId: Int,
     mascotaInicial: Int?
 ) : ViewModel() {
+
+    /** Si el veterinario apago "Aceptar citas" en Ajustes, el dueño no puede pedir. */
+    val aceptaCitas: StateFlow<Boolean> = prefs.aceptarCitas
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     /** Solo las mascotas del dueño. */
     val mascotas: StateFlow<List<Mascota>> = repo.observarMascotasDeDueno(duenoId)
@@ -95,6 +101,10 @@ class PedirCitaViewModel(
 
     /** Valida todo, vuelve a revisar que el horario siga libre y crea la cita (PENDIENTE). */
     fun confirmar(onCreada: () -> Unit) {
+        if (!aceptaCitas.value) {
+            _mensaje.value = "La clínica no está recibiendo citas"
+            return
+        }
         val mascota = _mascotaId.value
         val servicio = _servicioId.value
         val f = _fecha.value

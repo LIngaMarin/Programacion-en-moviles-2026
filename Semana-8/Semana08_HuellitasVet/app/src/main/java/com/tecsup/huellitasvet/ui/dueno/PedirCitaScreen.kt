@@ -56,6 +56,7 @@ fun PedirCitaScreen(
     val hora by vm.hora.collectAsState()
     val noDisponibles by vm.horasNoDisponibles.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
+    val aceptaCitas by vm.aceptaCitas.collectAsState()
     val colores = MaterialTheme.colorScheme
 
     val mascota = mascotas.find { it.id == mascotaId }
@@ -73,6 +74,20 @@ fun PedirCitaScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
+
+            // Aviso si el veterinario apago "Aceptar citas"
+            if (!aceptaCitas) {
+                Text(
+                    "La clínica no está recibiendo citas",
+                    color = colores.error,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colores.error.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                )
+            }
+
             // ¿Quien viene?
             Titulo("¿Quién viene?")
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -180,7 +195,7 @@ fun PedirCitaScreen(
             VetButton(
                 texto = "Confirmar cita",
                 onClick = { vm.confirmar(onCreada) },
-                habilitado = completo
+                habilitado = completo && aceptaCitas
             )
             Spacer(Modifier.height(16.dp))
         }
