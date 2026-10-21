@@ -4,22 +4,29 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.tecsup.huellitasvet.data.local.dao.CitaDao
+import com.tecsup.huellitasvet.data.local.dao.MascotaDao
 import com.tecsup.huellitasvet.data.local.dao.ServicioDao
+import com.tecsup.huellitasvet.data.local.dao.UsuarioDao
+import com.tecsup.huellitasvet.data.local.entity.Cita
+import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.Usuario
 
 /**
- * GUIADO. Base de datos Room de la app (archivo huellitasvet.db).
- * Por ahora solo tiene la tabla servicios (ejemplo resuelto).
+ * Base de datos Room de la app (archivo huellitasvet.db) con sus 4 tablas.
  */
 @Database(
-    entities = [Servicio::class /* TODO (Paso 3): agrega las otras 3 entidades */],
+    entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class],
     version = 1,
     exportSchema = false
 )
 abstract class VetDatabase : RoomDatabase() {
 
     abstract fun servicioDao(): ServicioDao
-    // TODO (Paso 3): usuarioDao(), mascotaDao() y citaDao()
+    abstract fun usuarioDao(): UsuarioDao
+    abstract fun mascotaDao(): MascotaDao
+    abstract fun citaDao(): CitaDao
 
     companion object {
         // @Volatile: todos los hilos ven siempre el mismo valor de INSTANCE
