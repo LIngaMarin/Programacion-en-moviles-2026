@@ -31,12 +31,15 @@ import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
+import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
+import com.tecsup.huellitasvet.ui.dueno.PerfilScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
+import com.tecsup.huellitasvet.viewmodel.MisCitasViewModel
 import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
@@ -118,6 +121,26 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     }
                 }
             }
+            composable(Rutas.MIS_CITAS) {
+                PantallaDueno(navController, oscuro, rutaBarra = Rutas.MIS_CITAS) {
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        val vm = vetViewModel(key = "mis-citas-${u.id}") { app -> MisCitasViewModel(app.repository, u.id) }
+                        MisCitasScreen(
+                            vm = vm,
+                            onPedirCita = { navController.navigate(Rutas.pedirCita()) }
+                        )
+                    }
+                }
+            }
+            composable(Rutas.PERFIL) {
+                PantallaDueno(navController, oscuro, rutaBarra = Rutas.PERFIL) {
+                    // TODO (Paso 13): perfil completo
+                    PerfilScreen(nombre = usuario?.nombre ?: "", correo = usuario?.correo ?: "")
+                }
+            }
             // Formulario: sin id = nueva mascota; con id = editar
             composable(
                 Rutas.FORMULARIO_MASCOTA,
@@ -173,9 +196,14 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                         PedirCitaScreen(
                             vm = vm,
                             onVolver = { navController.popBackStack() },
-                            // TODO (Paso 10): al crear la cita, ir a Mis citas
-                            onCreada = { navController.popBackStack() }
-                        )
+                            // Al crear la cita vuelve a Mis citas (ahi aparece como PENDIENTE)
+                            onCreada = {
+                                // Ir a Mis citas sin restaurar la pila guardada (asi no vuelve a Pedir cita)
+                                navController.navigate(Rutas.MIS_CITAS) {
+                                    popUpTo(Rutas.INICIO)
+                                    launchSingleTop = true
+                                }
+                            }                        )
                     }
                 }
             }
