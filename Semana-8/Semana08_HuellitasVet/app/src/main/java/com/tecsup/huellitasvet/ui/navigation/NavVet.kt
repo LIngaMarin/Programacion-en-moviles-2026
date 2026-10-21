@@ -1,49 +1,185 @@
 package com.tecsup.huellitasvet.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.huellitasvet.model.Rol
+import com.tecsup.huellitasvet.ui.components.BarraInferior
+import com.tecsup.huellitasvet.ui.components.OpcionBarra
+import com.tecsup.huellitasvet.ui.components.opcionesDueno
+import com.tecsup.huellitasvet.ui.components.opcionesVeterinario
+import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
+import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
 
 /**
- * GUIADO. Grafo de navegacion de la app.
- * Por ahora: Splash -> Servicios (ejemplo resuelto). El resto se agrega paso a paso.
+ * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
+ * (Dueño en verde y Veterinario en azul), cada uno con su barra inferior.
  */
 @Composable
 fun NavVet(navController: NavHostController = rememberNavController()) {
+    // Un solo SesionViewModel para toda la app (se crea fuera del NavHost)
+    val sesion = vetViewModel { app -> SesionViewModel(app.repository, app.preferencias) }
+    val oscuro by sesion.modoOscuro.collectAsState()
+    val perfilGuardado by sesion.perfilGuardado.collectAsState()
+
     NavHost(navController = navController, startDestination = Rutas.SPLASH) {
 
         composable(Rutas.SPLASH) {
-            // TODO (Paso 6): "Comenzar" y "Ya tengo una cuenta" van al Login;
-            // si ya hay un perfil guardado en DataStore, saltar directo a Inicio o Panel
-            SplashScreen(
-                onComenzar = { navController.navigate(Rutas.SERVICIOS) },
-                onYaTengoCuenta = { navController.navigate(Rutas.SERVICIOS) }
-            )
-        }
-
-        // TODO (Paso 6): composable(Rutas.LOGIN)
-        // TODO (Pasos 7 al 10 y 13): grafo del dueño (Rutas.GRAFO_DUENO) con su barra inferior
-        // TODO (Pasos 11 al 13): grafo del veterinario (Rutas.GRAFO_VETERINARIO) con su barra inferior
-
-        // Ejemplo resuelto: pantalla de servicios con los colores del veterinario
-        composable(Rutas.SERVICIOS) {
-            VetTheme(rol = Rol.ADMIN) {
-                val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
-                ServiciosScreen(
-                    vm = vm,
-                    onEditar = { /* TODO (Paso 13): navController.navigate(Rutas.formularioServicio(it)) */ },
-                    onNuevo = { /* TODO (Paso 13): navController.navigate(Rutas.formularioServicio()) */ },
-                    onAtras = { navController.popBackStack() }
+            // Si ya hay un perfil guardado, salta el login y va directo a su pantalla principal
+            LaunchedEffect(perfilGuardado) {
+                when (perfilGuardado) {
+                    Rol.CLIENTE.name -> irAGrafo(navController, Rutas.GRAFO_DUENO)
+                    Rol.ADMIN.name -> irAGrafo(navController, Rutas.GRAFO_VETERINARIO)
+                }
+            }
+            VetTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+                SplashScreen(
+                    onComenzar = { navController.navigate(Rutas.LOGIN) },
+                    onYaTengoCuenta = { navController.navigate(Rutas.LOGIN) }
                 )
             }
         }
+
+        composable(Rutas.LOGIN) {
+            LoginScreen(
+                vm = sesion,
+                oscuro = oscuro,
+                onIngresar = { rol ->
+                    val grafo = if (rol == Rol.CLIENTE) Rutas.GRAFO_DUENO else Rutas.GRAFO_VETERINARIO
+                    irAGrafo(navController, grafo)
+                }
+            )
+        }
+
+        // ---------- Grafo del Dueño ----------
+        navigation(startDestination = Rutas.INICIO, route = Rutas.GRAFO_DUENO) {
+            composable(Rutas.INICIO) {
+                PantallaDueno(navController, oscuro, rutaBarra = Rutas.INICIO) {
+                    // TODO (Paso 7): InicioScreen
+                    PantallaPendiente("Inicio del dueño (Paso 7)")
+                }
+            }
+        }
+
+        // ---------- Grafo del Veterinario ----------
+        navigation(startDestination = Rutas.PANEL, route = Rutas.GRAFO_VETERINARIO) {
+            composable(Rutas.PANEL) {
+                PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.PANEL) {
+                    // TODO (Paso 11): PanelScreen
+                    PantallaPendiente("Panel de la clínica (Paso 11)")
+                }
+            }
+            composable(Rutas.SERVICIOS) {
+                PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.SERVICIOS) {
+                    val vm = vetViewModel { app -> ServiciosViewModel(app.repository) }
+                    ServiciosScreen(
+                        vm = vm,
+                        onEditar = { /* TODO (Paso 13): abrir el formulario de servicio */ },
+                        onNuevo = { /* TODO (Paso 13): abrir el formulario de servicio */ }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Navega al grafo de un perfil y limpia toda la pila: con "atras" no se vuelve al login. */
+private fun irAGrafo(navController: NavHostController, grafo: String) {
+    navController.navigate(grafo) {
+        popUpTo(navController.graph.id) { inclusive = true }
+        launchSingleTop = true
+    }
+}
+
+/** Pantalla del dueño: tema verde y, si rutaBarra no es null, la barra inferior de 4 opciones. */
+@Composable
+private fun PantallaDueno(
+    navController: NavHostController,
+    oscuro: Boolean,
+    rutaBarra: String? = null,
+    contenido: @Composable () -> Unit
+) {
+    VetTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+        if (rutaBarra == null) contenido()
+        else ConBarra(navController, opcionesDueno, rutaBarra, contenido)
+    }
+}
+
+/** Pantalla del veterinario: tema azul y, si rutaBarra no es null, la barra inferior de 5 opciones. */
+@Composable
+private fun PantallaVeterinario(
+    navController: NavHostController,
+    oscuro: Boolean,
+    rutaBarra: String? = null,
+    contenido: @Composable () -> Unit
+) {
+    VetTheme(rol = Rol.ADMIN, oscuro = oscuro) {
+        if (rutaBarra == null) contenido()
+        else ConBarra(navController, opcionesVeterinario, rutaBarra, contenido)
+    }
+}
+
+/** Scaffold con la NavigationBar del perfil y el contenido de la pantalla encima. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ConBarra(
+    navController: NavHostController,
+    opciones: List<OpcionBarra>,
+    rutaActual: String,
+    contenido: @Composable () -> Unit
+) {
+    Scaffold(
+        bottomBar = {
+            BarraInferior(opciones = opciones, rutaActual = rutaActual, onNavegar = { ruta ->
+                // Solo navega si esa pantalla ya existe en el grafo (las demas se agregan en los siguientes pasos)
+                val grafo = navController.currentBackStackEntry?.destination?.parent
+                if (grafo?.findNode(ruta) != null) {
+                    navController.navigate(ruta) {
+                        popUpTo(opciones.first().ruta) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            })
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .consumeWindowInsets(padding)
+        ) {
+            contenido()
+        }
+    }
+}
+
+/** Texto temporal para las pantallas que se hacen en los siguientes pasos. */
+@Composable
+private fun PantallaPendiente(texto: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(texto, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
