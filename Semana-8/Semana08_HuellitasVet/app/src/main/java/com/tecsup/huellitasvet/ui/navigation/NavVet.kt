@@ -44,6 +44,10 @@ import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
+import com.tecsup.huellitasvet.ui.veterinario.AgendaScreen
+import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
+import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
+import com.tecsup.huellitasvet.viewmodel.PanelViewModel
 
 /**
  * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
@@ -213,8 +217,20 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
         navigation(startDestination = Rutas.PANEL, route = Rutas.GRAFO_VETERINARIO) {
             composable(Rutas.PANEL) {
                 PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.PANEL) {
-                    // TODO (Paso 11): PanelScreen
-                    PantallaPendiente("Panel de la clínica (Paso 11)")
+                    val vm = vetViewModel { app -> PanelViewModel(app.repository) }
+                    PanelScreen(
+                        vm = vm,
+                        onVerPendientes = { irATab(navController, Rutas.AGENDA, Rutas.PANEL) }
+                    )
+                }
+            }
+            composable(Rutas.AGENDA) {
+                PantallaVeterinario(navController, oscuro, rutaBarra = Rutas.AGENDA) {
+                    val vm = vetViewModel { app -> AgendaViewModel(app.repository) }
+                    AgendaScreen(
+                        vm = vm,
+                        onAtender = { /* TODO (Paso 12): abrir atender cita */ }
+                    )
                 }
             }
             composable(Rutas.SERVICIOS) {
