@@ -31,11 +31,13 @@ import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
+import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
 import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
+import com.tecsup.huellitasvet.viewmodel.PedirCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -96,7 +98,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                             onVerMascota = { id -> navController.navigate(Rutas.fichaMascota(id)) },
                             onAgregarMascota = { navController.navigate(Rutas.formularioMascota()) },
                             onVerTodas = { irATab(navController, Rutas.MASCOTAS, Rutas.INICIO) },
-                            onPedirCita = { /* TODO (Paso 9): abrir pedir cita */ }
+                            onPedirCita = { navController.navigate(Rutas.pedirCita()) }
                         )
                     }
                 }
@@ -149,9 +151,32 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     FichaMascotaScreen(
                         vm = vm,
                         onVolver = { navController.popBackStack() },
-                        onPedirCita = { /* TODO (Paso 9): abrir pedir cita con esta mascota */ },
+                        onPedirCita = { navController.navigate(Rutas.pedirCita(id)) },
                         onEditar = { navController.navigate(Rutas.formularioMascota(id)) }
                     )
+                }
+            }
+            // Pedir cita: puede llegar con una mascota ya elegida (desde su ficha)
+            composable(
+                Rutas.PEDIR_CITA,
+                arguments = listOf(navArgument("mascotaId") { type = NavType.IntType; defaultValue = -1 })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("mascotaId") ?: -1
+                PantallaDueno(navController, oscuro) {
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        val vm = vetViewModel(key = "pedir-cita-$id") { app ->
+                            PedirCitaViewModel(app.repository, u.id, if (id == -1) null else id)
+                        }
+                        PedirCitaScreen(
+                            vm = vm,
+                            onVolver = { navController.popBackStack() },
+                            // TODO (Paso 10): al crear la cita, ir a Mis citas
+                            onCreada = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
