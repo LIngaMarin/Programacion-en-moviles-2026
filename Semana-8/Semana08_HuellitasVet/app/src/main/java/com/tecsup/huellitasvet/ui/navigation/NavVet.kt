@@ -15,15 +15,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.ui.components.BarraInferior
 import com.tecsup.huellitasvet.ui.components.OpcionBarra
 import com.tecsup.huellitasvet.ui.components.opcionesDueno
 import com.tecsup.huellitasvet.ui.components.opcionesVeterinario
+import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
+import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
@@ -31,6 +35,7 @@ import com.tecsup.huellitasvet.ui.dueno.SplashScreen
 import com.tecsup.huellitasvet.ui.theme.VetTheme
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
+import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 import com.tecsup.huellitasvet.viewmodel.vetViewModel
@@ -88,8 +93,8 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                         InicioScreen(
                             vm = vm,
                             nombre = u.nombre,
-                            onVerMascota = { /* TODO (Paso 8): abrir la ficha de la mascota */ },
-                            onAgregarMascota = { /* TODO (Paso 8): abrir el formulario de mascota */ },
+                            onVerMascota = { id -> navController.navigate(Rutas.fichaMascota(id)) },
+                            onAgregarMascota = { navController.navigate(Rutas.formularioMascota()) },
                             onVerTodas = { irATab(navController, Rutas.MASCOTAS, Rutas.INICIO) },
                             onPedirCita = { /* TODO (Paso 9): abrir pedir cita */ }
                         )
@@ -105,10 +110,48 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                         val vm = vetViewModel(key = "mascotas-${u.id}") { app -> InicioViewModel(app.repository, u.id) }
                         MascotasScreen(
                             vm = vm,
-                            onVerMascota = { /* TODO (Paso 8): abrir la ficha de la mascota */ },
-                            onAgregar = { /* TODO (Paso 8): abrir el formulario de mascota */ }
+                            onVerMascota = { id -> navController.navigate(Rutas.fichaMascota(id)) },
+                            onAgregar = { navController.navigate(Rutas.formularioMascota()) }
                         )
                     }
+                }
+            }
+            // Formulario: sin id = nueva mascota; con id = editar
+            composable(
+                Rutas.FORMULARIO_MASCOTA,
+                arguments = listOf(navArgument("mascotaId") { type = NavType.IntType; defaultValue = -1 })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("mascotaId") ?: -1
+                val mascotaId = if (id == -1) null else id
+                PantallaDueno(navController, oscuro) {
+                    val u = usuario
+                    if (u == null) {
+                        PantallaPendiente("Cargando…")
+                    } else {
+                        val vm = vetViewModel(key = "form-mascota-$id") { app -> MascotaViewModel(app.repository, mascotaId, u.id) }
+                        FormularioMascotaScreen(
+                            vm = vm,
+                            esEdicion = mascotaId != null,
+                            onVolver = { navController.popBackStack() },
+                            // Si se elimino, se cierra tambien la ficha de esa mascota
+                            onEliminada = { navController.popBackStack(Rutas.FICHA_MASCOTA, inclusive = true) }
+                        )
+                    }
+                }
+            }
+            composable(
+                Rutas.FICHA_MASCOTA,
+                arguments = listOf(navArgument("mascotaId") { type = NavType.IntType })
+            ) { entrada ->
+                val id = entrada.arguments?.getInt("mascotaId") ?: 0
+                PantallaDueno(navController, oscuro) {
+                    val vm = vetViewModel(key = "ficha-$id") { app -> MascotaViewModel(app.repository, id, usuario?.id ?: 0) }
+                    FichaMascotaScreen(
+                        vm = vm,
+                        onVolver = { navController.popBackStack() },
+                        onPedirCita = { /* TODO (Paso 9): abrir pedir cita con esta mascota */ },
+                        onEditar = { navController.navigate(Rutas.formularioMascota(id)) }
+                    )
                 }
             }
         }
