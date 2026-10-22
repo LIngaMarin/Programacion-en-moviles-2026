@@ -121,6 +121,9 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>> =
         citaDao.observarPorFecha(fecha)
 
+    override fun observarFechasConCitas(inicio: String, fin: String): Flow<List<String>> =
+        citaDao.observarFechasConCitas(inicio, fin)
+
     override fun observarCita(id: Int): Flow<CitaConDetalle?> = citaDao.observarUna(id)
 
     override fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>> =

@@ -51,6 +51,7 @@ interface VetRepository {
                           hora: String, nota: String): Long
     fun observarCitasDeDueno(duenoId: Int): Flow<List<CitaConDetalle>>
     fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>>
+    fun observarFechasConCitas(inicio: String, fin: String): Flow<List<String>>
     fun observarCita(id: Int): Flow<CitaConDetalle?>
     fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
     fun observarPesos(mascotaId: Int): Flow<List<PuntoPeso>>

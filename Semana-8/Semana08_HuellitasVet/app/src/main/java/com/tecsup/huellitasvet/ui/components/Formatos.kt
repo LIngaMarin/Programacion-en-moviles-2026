@@ -23,6 +23,15 @@ fun diaMes(iso: String): String {
     return "${f.dayOfMonth} ${MESES[f.monthValue - 1]}"
 }
 
+private val MESES_LARGOS = listOf(
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre")
+
+/** "Octubre 2026" */
+fun nombreMesAnio(yearMonth: java.time.YearMonth): String {
+    return "${MESES_LARGOS[yearMonth.monthValue - 1]} ${yearMonth.year}"
+}
+
 /** 3420.0 -> "S/ 3,420.00" */
 fun soles(monto: Double): String = String.format(Locale.US, "S/ %,.2f", monto)
 

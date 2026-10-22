@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 
 /**
  * Agenda del veterinario: citas del dia elegido ordenadas por hora,
@@ -28,6 +30,18 @@ class AgendaViewModel(private val repo: VetRepository) : ViewModel() {
     private val _fechaSeleccionada = MutableStateFlow(LocalDate.now())   // por defecto: hoy
     val fechaSeleccionada: StateFlow<LocalDate> = _fechaSeleccionada.asStateFlow()
 
+    private val _mesVisible = MutableStateFlow(YearMonth.now())
+    val mesVisible: StateFlow<YearMonth> = _mesVisible.asStateFlow()
+
+    val diasConCitas: StateFlow<Set<LocalDate>> = _mesVisible
+        .flatMapLatest { ym ->
+            val inicio = ym.atDay(1).toString()
+            val fin = ym.atEndOfMonth().toString()
+            repo.observarFechasConCitas(inicio, fin)
+        }
+        .map { lista -> lista.map { LocalDate.parse(it) }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
     /** Citas del dia elegido, ordenadas por hora (lo ordena el DAO). */
     val citas: StateFlow<List<CitaConDetalle>> = _fechaSeleccionada
         .flatMapLatest { f -> repo.observarCitasPorFecha(f.toString()) }
@@ -35,6 +49,14 @@ class AgendaViewModel(private val repo: VetRepository) : ViewModel() {
 
     fun elegirFecha(f: LocalDate) {
         _fechaSeleccionada.value = f
+    }
+
+    fun mesAnterior() {
+        _mesVisible.value = _mesVisible.value.minusMonths(1)
+    }
+
+    fun mesSiguiente() {
+        _mesVisible.value = _mesVisible.value.plusMonths(1)
     }
 
     /** PENDIENTE -> CONFIRMADA. */
