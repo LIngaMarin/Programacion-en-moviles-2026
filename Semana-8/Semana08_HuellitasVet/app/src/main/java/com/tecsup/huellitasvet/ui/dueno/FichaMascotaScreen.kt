@@ -17,18 +17,26 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.huellitasvet.data.local.entity.Mascota
+import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.model.Especie
 import com.tecsup.huellitasvet.model.PuntoPeso
@@ -46,26 +55,34 @@ import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.HistorialItem
 import com.tecsup.huellitasvet.ui.components.MascotaAvatar
 import com.tecsup.huellitasvet.ui.components.VetButton
+import com.tecsup.huellitasvet.ui.components.VetTextField
 import com.tecsup.huellitasvet.ui.components.edad
+import com.tecsup.huellitasvet.ui.components.fechaCorta
 import com.tecsup.huellitasvet.ui.components.graficos.GraficoLineas
 import com.tecsup.huellitasvet.ui.components.kilos
+import com.tecsup.huellitasvet.ui.theme.EstadoCancelada
+import com.tecsup.huellitasvet.ui.theme.EstadoConfirmada
 import com.tecsup.huellitasvet.viewmodel.MascotaViewModel
+import java.time.LocalDate
 
 /**
- * Ficha de la mascota: cabecera, botones y pestañas Datos / Historial clinico.
+ * Ficha de la mascota: cabecera, botones y pestañas Datos / Historial clínico / Vacunas.
  * onPedirCita y onEditar son opcionales: el veterinario ve la ficha sin esos botones.
+ * puedeAgregarVacuna = true habilita el botón de agregar vacunas (solo para veterinario).
  */
 @Composable
 fun FichaMascotaScreen(
     vm: MascotaViewModel,
     onVolver: () -> Unit,
     onPedirCita: (() -> Unit)? = null,
-    onEditar: (() -> Unit)? = null
+    onEditar: (() -> Unit)? = null,
+    puedeAgregarVacuna: Boolean = false
 ) {
     val mascota by vm.mascota.collectAsState()
     val historial by vm.historial.collectAsState()
     val pesos by vm.pesos.collectAsState()
-    var pestana by rememberSaveable { mutableIntStateOf(1) }   // 0 = Datos, 1 = Historial clinico
+    val vacunas by vm.vacunas.collectAsState()
+    var pestana by rememberSaveable { mutableIntStateOf(1) }   // 0 = Datos, 1 = Historial clínico, 2 = Vacunas
 
     Scaffold(
         topBar = { AppTopBar(mascota?.nombre ?: "Mascota", onAtras = onVolver) },
@@ -102,7 +119,11 @@ fun FichaMascotaScreen(
                 Pestanas(seleccionada = pestana, onCambiar = { pestana = it })
                 Spacer(Modifier.height(14.dp))
 
-                if (pestana == 0) Datos(m) else Historial(historial = historial, pesos = pesos)
+                when (pestana) {
+                    0 -> Datos(m)
+                    1 -> Historial(historial = historial, pesos = pesos)
+                    2 -> Vacunas(vacunas = vacunas, puedeAgregarVacuna = puedeAgregarVacuna, vm = vm)
+                }
             }
         }
     }
@@ -137,7 +158,7 @@ private fun Cabecera(m: Mascota) {
     }
 }
 
-/** Dos pestañas: Datos / Historial clinico. */
+/** Tres pestañas: Datos / Historial clínico / Vacunas. */
 @Composable
 private fun Pestanas(seleccionada: Int, onCambiar: (Int) -> Unit) {
     val colores = MaterialTheme.colorScheme
@@ -147,7 +168,7 @@ private fun Pestanas(seleccionada: Int, onCambiar: (Int) -> Unit) {
             .background(colores.surfaceContainerHighest, RoundedCornerShape(12.dp))
             .padding(4.dp)
     ) {
-        listOf("Datos", "Historial clínico").forEachIndexed { i, texto ->
+        listOf("Datos", "Historial clínico", "Vacunas").forEachIndexed { i, texto ->
             val elegida = i == seleccionada
             Box(
                 modifier = Modifier
@@ -161,7 +182,8 @@ private fun Pestanas(seleccionada: Int, onCambiar: (Int) -> Unit) {
                 Text(
                     texto,
                     color = if (elegida) colores.primary else colores.onSurfaceVariant,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
         }
@@ -239,4 +261,206 @@ private fun Historial(historial: List<CitaConDetalle>, pesos: List<PuntoPeso>) {
             }
         }
     }
+}
+
+/** Carnet de vacunas de la mascota. */
+@Composable
+private fun Vacunas(
+    vacunas: List<Vacuna>,
+    puedeAgregarVacuna: Boolean,
+    vm: MascotaViewModel
+) {
+    var mostrarDialogo by remember { mutableStateOf(false) }
+
+    Column {
+        if (puedeAgregarVacuna) {
+            VetButton(
+                texto = "Agregar vacuna",
+                onClick = {
+                    vm.limpiarErroresVacuna()
+                    mostrarDialogo = true
+                },
+                icono = Icons.Filled.Add,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+
+        if (vacunas.isEmpty()) {
+            Text(
+                "Aún no tiene vacunas registradas",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                vacunas.forEach { vacuna ->
+                    VacunaCard(
+                        vacuna = vacuna,
+                        esVencida = vm.esVacunaVencida(vacuna),
+                        puedeEliminar = puedeAgregarVacuna,
+                        onEliminar = { vm.eliminarVacuna(vacuna) }
+                    )
+                }
+            }
+        }
+    }
+
+    if (mostrarDialogo) {
+        AgregarVacunaDialog(
+            vm = vm,
+            onDismiss = {
+                mostrarDialogo = false
+                vm.limpiarErroresVacuna()
+            },
+            onGuardar = { nombre, fecha, proximaDosis ->
+                vm.agregarVacuna(nombre, fecha, proximaDosis) {
+                    mostrarDialogo = false
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun VacunaCard(
+    vacuna: Vacuna,
+    esVencida: Boolean,
+    puedeEliminar: Boolean,
+    onEliminar: () -> Unit
+) {
+    val colores = MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colores.surface),
+        border = BorderStroke(1.dp, colores.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = vacuna.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val colorEtiqueta = if (esVencida) EstadoCancelada else EstadoConfirmada
+                    Box(
+                        modifier = Modifier
+                            .background(colorEtiqueta.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (esVencida) "Vencida" else "Al día",
+                            color = colorEtiqueta,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    if (puedeEliminar) {
+                        Spacer(Modifier.width(4.dp))
+                        IconButton(onClick = onEliminar) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Eliminar vacuna",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            val fechaAplicacionTexto = try { fechaCorta(vacuna.fecha) } catch (e: Exception) { vacuna.fecha }
+            Text(
+                text = "Fecha de aplicación: $fechaAplicacionTexto",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colores.onSurface
+            )
+
+            val proxTexto = vacuna.proximaDosis?.let { prox ->
+                try { fechaCorta(prox) } catch (e: Exception) { prox }
+            } ?: "—"
+
+            Text(
+                text = "Próxima dosis: $proxTexto",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colores.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun AgregarVacunaDialog(
+    vm: MascotaViewModel,
+    onDismiss: () -> Unit,
+    onGuardar: (nombre: String, fecha: String, proximaDosis: String?) -> Unit
+) {
+    var nombre by remember { mutableStateOf("") }
+    var fecha by remember { mutableStateOf(LocalDate.now().toString()) }
+    var proximaDosis by remember { mutableStateOf("") }
+
+    val errores by vm.erroresVacuna.collectAsState()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Agregar vacuna",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                VetTextField(
+                    valor = nombre,
+                    onValorCambia = { nombre = it },
+                    etiqueta = "Nombre de la vacuna",
+                    placeholder = "Ej. Triple Felina",
+                    error = errores.nombre
+                )
+                VetTextField(
+                    valor = fecha,
+                    onValorCambia = { fecha = it },
+                    etiqueta = "Fecha de aplicación (aaaa-MM-dd)",
+                    placeholder = "aaaa-MM-dd",
+                    error = errores.fecha
+                )
+                VetTextField(
+                    valor = proximaDosis,
+                    onValorCambia = { proximaDosis = it },
+                    etiqueta = "Próxima dosis (opcional)",
+                    placeholder = "aaaa-MM-dd",
+                    error = errores.proximaDosis
+                )
+            }
+        },
+        confirmButton = {
+            VetButton(
+                texto = "Guardar",
+                onClick = { onGuardar(nombre, fecha, proximaDosis) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }

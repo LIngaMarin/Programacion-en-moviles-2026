@@ -3,6 +3,7 @@ package com.tecsup.huellitasvet.data.repository
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.model.ConteoServicio
@@ -38,6 +39,11 @@ interface VetRepository {
     suspend fun guardarMascota(m: Mascota)
     suspend fun eliminarMascota(m: Mascota)
     suspend fun mascotaTieneCitas(id: Int): Boolean
+
+    // Vacunas
+    fun observarVacunas(mascotaId: Int): Flow<List<Vacuna>>
+    suspend fun agregarVacuna(v: Vacuna)
+    suspend fun eliminarVacuna(v: Vacuna)
 
     // Citas
     fun observarHorasOcupadas(fecha: String): Flow<List<String>>

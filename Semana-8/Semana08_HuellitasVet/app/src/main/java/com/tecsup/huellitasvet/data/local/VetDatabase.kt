@@ -8,17 +8,19 @@ import com.tecsup.huellitasvet.data.local.dao.CitaDao
 import com.tecsup.huellitasvet.data.local.dao.MascotaDao
 import com.tecsup.huellitasvet.data.local.dao.ServicioDao
 import com.tecsup.huellitasvet.data.local.dao.UsuarioDao
+import com.tecsup.huellitasvet.data.local.dao.VacunaDao
 import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.entity.Vacuna
 
 /**
- * Base de datos Room de la app (archivo huellitasvet.db) con sus 4 tablas.
+ * Base de datos Room de la app (archivo huellitasvet.db) con sus 5 tablas.
  */
 @Database(
-    entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class],
-    version = 1,
+    entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class, Vacuna::class],
+    version = 2,
     exportSchema = false
 )
 abstract class VetDatabase : RoomDatabase() {
@@ -27,6 +29,7 @@ abstract class VetDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun mascotaDao(): MascotaDao
     abstract fun citaDao(): CitaDao
+    abstract fun vacunaDao(): VacunaDao
 
     companion object {
         // @Volatile: todos los hilos ven siempre el mismo valor de INSTANCE
@@ -39,7 +42,9 @@ abstract class VetDatabase : RoomDatabase() {
                 context.applicationContext,
                 VetDatabase::class.java,
                 "huellitasvet.db"
-            ).build().also { INSTANCE = it }
+            )
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build().also { INSTANCE = it }
         }
     }
 }

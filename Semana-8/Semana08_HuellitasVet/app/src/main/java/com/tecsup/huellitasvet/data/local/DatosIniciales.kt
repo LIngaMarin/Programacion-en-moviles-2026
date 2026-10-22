@@ -4,6 +4,7 @@ import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.model.Especie
 import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Rol
@@ -24,6 +25,7 @@ object DatosIniciales {
         db.servicioDao().insertarTodos(servicios)
         db.usuarioDao().insertarTodos(usuarios)
         db.mascotaDao().insertarTodas(mascotas)
+        db.vacunaDao().insertarTodas(vacunas())
         db.citaDao().insertarTodas(citas())
     }
 
@@ -48,6 +50,15 @@ object DatosIniciales {
         Mascota(id = 2, duenoId = 1, nombre = "Max", especie = Especie.PERRO.name, raza = "Labrador", anioNacimiento = 2021, peso = 24.5, sexo = Sexo.MACHO.name),
         Mascota(id = 3, duenoId = 2, nombre = "Rocky", especie = Especie.PERRO.name, raza = "Bulldog", anioNacimiento = 2020, peso = 18.0, sexo = Sexo.MACHO.name),
         Mascota(id = 4, duenoId = 2, nombre = "Michi", especie = Especie.GATO.name, raza = "Mestizo", anioNacimiento = 2024, peso = 3.6, sexo = Sexo.MACHO.name)
+    )
+
+    // ---------- Vacunas: para Luna, Max y Rocky ----------
+    private fun vacunas() = listOf(
+        Vacuna(mascotaId = 1, nombre = "Triple Felina", fecha = dia(-180), proximaDosis = dia(185)),
+        Vacuna(mascotaId = 1, nombre = "Leucemia Felina", fecha = dia(-400), proximaDosis = dia(-35)), // proxima dosis vencida
+        Vacuna(mascotaId = 2, nombre = "Sextuple Canina", fecha = dia(-90), proximaDosis = dia(275)),
+        Vacuna(mascotaId = 2, nombre = "Antirrábica", fecha = dia(-30), proximaDosis = dia(335)),
+        Vacuna(mascotaId = 3, nombre = "Parvovirus Canino", fecha = dia(-200), proximaDosis = dia(165))
     )
 
     // ---------- Citas: pasadas (atendidas), de hoy y de los proximos dias ----------

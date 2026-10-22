@@ -6,6 +6,7 @@ import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
 import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.model.ConteoServicio
@@ -25,6 +26,7 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     private val usuarioDao = db.usuarioDao()
     private val mascotaDao = db.mascotaDao()
     private val citaDao = db.citaDao()
+    private val vacunaDao = db.vacunaDao()
 
     // ---------- Usuarios ----------
     override suspend fun login(correo: String, clave: String): Usuario? =
@@ -74,6 +76,18 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override suspend fun mascotaTieneCitas(id: Int): Boolean =
         mascotaDao.contarCitas(id) > 0
+
+    // ---------- Vacunas ----------
+    override fun observarVacunas(mascotaId: Int): Flow<List<Vacuna>> =
+        vacunaDao.observarPorMascota(mascotaId)
+
+    override suspend fun agregarVacuna(v: Vacuna) {
+        vacunaDao.insertar(v)
+    }
+
+    override suspend fun eliminarVacuna(v: Vacuna) {
+        vacunaDao.eliminar(v)
+    }
 
     // ---------- Citas ----------
     override fun observarHorasOcupadas(fecha: String): Flow<List<String>> =

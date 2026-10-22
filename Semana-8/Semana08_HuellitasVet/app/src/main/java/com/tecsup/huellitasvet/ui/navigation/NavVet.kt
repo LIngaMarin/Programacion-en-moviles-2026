@@ -297,7 +297,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                     )
                 }
             }
-            // Ficha del paciente: la misma ficha del dueño, pero sin "Pedir cita" ni "Editar"
+            // Ficha del paciente: la misma ficha del dueño, pero sin "Pedir cita" ni "Editar", con permiso de agregar vacunas
             composable(
                 Rutas.FICHA_PACIENTE,
                 arguments = listOf(navArgument("mascotaId") { type = NavType.IntType })
@@ -305,7 +305,11 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                 val id = entrada.arguments?.getInt("mascotaId") ?: 0
                 PantallaVeterinario(navController, oscuro) {
                     val vm = vetViewModel(key = "paciente-$id") { app -> MascotaViewModel(app.repository, id, 0) }
-                    FichaMascotaScreen(vm = vm, onVolver = { navController.popBackStack() })
+                    FichaMascotaScreen(
+                        vm = vm,
+                        onVolver = { navController.popBackStack() },
+                        puedeAgregarVacuna = true
+                    )
                 }
             }
             composable(
