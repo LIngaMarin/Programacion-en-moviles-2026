@@ -103,3 +103,14 @@ com.tecsup.huellitasvet
 |---|---|---|
 | <img src="capturas/vet-panel.png" width="220"> | <img src="capturas/vet-agenda.png" width="220"> | <img src="capturas/vet-atender.png" width="220"> |
 | Panel con gráficos e ingresos | Agenda del día | Atender cita (registro clínico) |
+
+## Mejoras con IA (rama `mejora-ia-huellitas`)
+
+Mejoras hechas con **Gemini en Android Studio** respetando MVVM (las funciones nuevas se declaran primero en la interface `VetRepository` y las reglas viven en los ViewModels):
+
+1. **Gráfico de peso:** la ficha de la mascota muestra la evolución del peso registrado en cada atención (`GraficoLineas` con Canvas).
+2. **Reprogramar cita:** el dueño cambia la fecha y hora de una cita pendiente o confirmada, respetando los horarios libres y la regla de 2 horas.
+3. **Carnet de vacunas:** nueva entidad `Vacuna` (la base sube a la **versión 2**, con 5 tablas) y pestaña "Vacunas" en la ficha con estado "Al día" o "Vencida"; solo el veterinario agrega vacunas.
+4. **Calendario mensual:** la agenda del veterinario tiene una vista de mes con un punto en los días que tienen citas.
+
+Los prompts usados, lo que generó la IA, lo que se corrigió y la reflexión están en [PROMPTS.md](PROMPTS.md).
