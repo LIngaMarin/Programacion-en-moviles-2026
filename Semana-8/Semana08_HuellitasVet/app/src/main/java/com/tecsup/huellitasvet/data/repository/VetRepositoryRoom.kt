@@ -36,6 +36,11 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override suspend fun obtenerUsuarioPorRol(rol: Rol): Usuario? = usuarioDao.obtenerPorRol(rol.name)
 
+    override suspend fun correoExiste(correo: String): Boolean = usuarioDao.contarPorCorreo(correo) > 0
+
+    // Room devuelve el id como Long; se pasa a Int porque Usuario.id es Int
+    override suspend fun registrarUsuario(u: Usuario): Int = usuarioDao.insertar(u).toInt()
+
     // ---------- Servicios (ejemplo resuelto) ----------
     override fun observarServicios(): Flow<List<Servicio>> = servicioDao.observarTodos()
 

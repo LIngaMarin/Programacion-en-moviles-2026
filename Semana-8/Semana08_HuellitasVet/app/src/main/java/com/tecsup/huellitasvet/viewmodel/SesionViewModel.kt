@@ -28,6 +28,9 @@ class SesionViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+    // Mensaje de exito para el login (por ejemplo, despues de registrarse)
+    private val _aviso = MutableStateFlow<String?>(null)
+    val aviso: StateFlow<String?> = _aviso.asStateFlow()
 
     // ---------- Preferencias (DataStore) ----------
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
@@ -81,8 +84,37 @@ class SesionViewModel(
         }
     }
 
+    /**
+     * Registra a un dueño nuevo (siempre rol CLIENTE: el veterinario no se registra solo).
+     * Valida aqui; si todo esta bien lo guarda en Room, inicia su sesion en DataStore
+     * y llama a onExito para que la navegacion vaya a su Inicio.
+     */
+    fun registrar(nombre: String, correo: String, clave: String, confirmar: String, onExito: () -> Unit) {
+        val nombreLimpio = nombre.trim()
+        val correoLimpio = correo.trim()
+        _error.value = when {
+            nombreLimpio.isBlank() || correoLimpio.isBlank() || clave.isBlank() -> "Completa todos los campos"
+            !correoLimpio.contains("@") || !correoLimpio.contains(".") -> "Ingresa un correo válido"
+            clave.length < 4 -> "La contraseña debe tener al menos 4 caracteres"
+            clave != confirmar -> "Las contraseñas no coinciden"
+            else -> null
+        }
+        if (_error.value != null) return
+        viewModelScope.launch {
+            if (repo.correoExiste(correoLimpio)) {
+                _error.value = "Ese correo ya está registrado"
+                return@launch
+            }
+            val nuevo = Usuario(nombre = nombreLimpio, correo = correoLimpio, clave = clave, rol = Rol.CLIENTE.name)
+            repo.registrarUsuario(nuevo)
+            _aviso.value = "Cuenta creada. Inicia sesión con tu correo y contraseña"
+            onExito()
+        }
+    }
+
     fun limpiarError() {
         _error.value = null
+        _aviso.value = null
     }
 
     // ---------- Ajustes ----------
