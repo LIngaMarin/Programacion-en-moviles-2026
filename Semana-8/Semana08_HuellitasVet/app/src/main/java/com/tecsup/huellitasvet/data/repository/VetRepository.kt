@@ -22,6 +22,9 @@ interface VetRepository {
 
     suspend fun obtenerUsuarioPorRol(rol: Rol): Usuario?
 
+    suspend fun correoExiste(correo: String): Boolean
+    suspend fun registrarUsuario(u: Usuario): Int
+
     // Servicios (ejemplo resuelto)
     fun observarServicios(): Flow<List<Servicio>>
     fun observarServiciosActivos(): Flow<List<Servicio>>

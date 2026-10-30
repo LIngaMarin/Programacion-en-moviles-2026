@@ -25,6 +25,14 @@ interface UsuarioDao {
     @Insert
     suspend fun insertarTodos(lista: List<Usuario>)
 
+    // Registro: inserta un usuario nuevo y devuelve el id que Room le genero
+    @Insert
+    suspend fun insertar(usuario: Usuario): Long
+
+    // Registro: cuantos usuarios tienen ese correo (0 = el correo esta libre)
+    @Query("SELECT COUNT(*) FROM usuarios WHERE correo = :correo")
+    suspend fun contarPorCorreo(correo: String): Int
+
     // Se usa en DatosIniciales: si es 0, la base esta vacia y se siembran los datos
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int

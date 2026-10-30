@@ -49,12 +49,14 @@ import com.tecsup.huellitasvet.viewmodel.SesionViewModel
 fun LoginScreen(
     vm: SesionViewModel,
     oscuro: Boolean,
-    onIngresar: (Rol) -> Unit
+    onIngresar: (Rol) -> Unit,
+    onRegistrarse: () -> Unit = {}
 ) {
     var rol by rememberSaveable { mutableStateOf(Rol.CLIENTE) }
     var correo by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
     val error by vm.error.collectAsState()
+    val aviso by vm.aviso.collectAsState()
 
     VetTheme(rol = rol, oscuro = oscuro) {
         val colores = MaterialTheme.colorScheme
@@ -107,6 +109,12 @@ fun LoginScreen(
                     Text(it, color = colores.error, style = MaterialTheme.typography.bodyMedium)
                 }
 
+                // Mensaje de exito (por ejemplo, cuenta creada)
+                aviso?.let {
+                    Spacer(Modifier.height(8.dp))
+                    Text(it, color = colores.primary, style = MaterialTheme.typography.bodyMedium)
+                }
+
                 Spacer(Modifier.height(20.dp))
                 VetButton(texto = "Ingresar", onClick = { vm.login(correo, clave, rol, onIngresar) })
                 Spacer(Modifier.height(16.dp))
@@ -114,7 +122,16 @@ fun LoginScreen(
                 if (rol == Rol.CLIENTE) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                         Text("¿No tienes cuenta? ", color = colores.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                        Text("Regístrate", color = colores.primary, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "Regístrate",
+                            color = colores.primary,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.clickable {
+                                vm.limpiarError()
+                                onRegistrarse()
+                            }
+                        )
                     }
                 } else {
                     // Aviso del mockup para el veterinario

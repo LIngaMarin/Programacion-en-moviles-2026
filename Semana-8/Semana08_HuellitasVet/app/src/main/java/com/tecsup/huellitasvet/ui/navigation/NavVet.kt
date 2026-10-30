@@ -30,6 +30,7 @@ import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
 import com.tecsup.huellitasvet.ui.dueno.LoginScreen
+import com.tecsup.huellitasvet.ui.dueno.RegistroScreen
 import com.tecsup.huellitasvet.ui.dueno.MascotasScreen
 import com.tecsup.huellitasvet.ui.dueno.MisCitasScreen
 import com.tecsup.huellitasvet.ui.dueno.PedirCitaScreen
@@ -99,7 +100,21 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
             LoginScreen(
                 vm = sesion,
                 oscuro = oscuro,
-                onIngresar = { rol -> irAGrafo(navController, grafoDe(rol)) }
+                onIngresar = { rol -> irAGrafo(navController, grafoDe(rol)) },
+                onRegistrarse = { navController.navigate(Rutas.REGISTRO) }
+            )
+        }
+
+        // Registro de un dueño nuevo: al terminar entra directo a su Inicio
+        composable(Rutas.REGISTRO) {
+            RegistroScreen(
+                vm = sesion,
+                oscuro = oscuro,
+                onRegistrado = { navController.popBackStack() },
+                onVolver = {
+                    sesion.limpiarError()
+                    navController.popBackStack()
+                }
             )
         }
 
