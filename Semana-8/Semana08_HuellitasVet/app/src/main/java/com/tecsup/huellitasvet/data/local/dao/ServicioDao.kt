@@ -42,4 +42,8 @@ interface ServicioDao {
 
     @Query("UPDATE servicios SET activo = :activo WHERE id = :id")
     suspend fun cambiarActivo(id: Int, activo: Boolean)
+
+    // Administrador: pone (o quita, con null) el tipo de un servicio
+    @Query("UPDATE servicios SET tipoId = :tipoId WHERE id = :servicioId")
+    suspend fun cambiarTipo(servicioId: Int, tipoId: Int?)
 }

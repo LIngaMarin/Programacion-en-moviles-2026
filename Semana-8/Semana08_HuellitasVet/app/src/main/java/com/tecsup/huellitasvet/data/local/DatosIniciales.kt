@@ -3,13 +3,13 @@ package com.tecsup.huellitasvet.data.local
 import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.TipoServicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
 import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.model.Especie
 import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.model.Sexo
-import com.tecsup.huellitasvet.model.TipoServicio
 import java.time.LocalDate
 
 /**
@@ -23,6 +23,7 @@ object DatosIniciales {
         if (db.usuarioDao().contar() > 0) return
 
         // El orden importa por las claves foraneas: primero los "padres"
+        db.tipoServicioDao().insertarTodos(tipos)
         db.servicioDao().insertarTodos(servicios)
         db.usuarioDao().insertarTodos(usuarios)
         db.mascotaDao().insertarTodas(mascotas)
@@ -30,12 +31,21 @@ object DatosIniciales {
         db.citaDao().insertarTodas(citas())
     }
 
+    // ---------- Tipos de servicio (el administrador puede crear, editar o eliminar) ----------
+    private val tipos = listOf(
+        TipoServicio(id = 1, nombre = "Consulta"),
+        TipoServicio(id = 2, nombre = "Prevención"),
+        TipoServicio(id = 3, nombre = "Estética"),
+        TipoServicio(id = 4, nombre = "Cirugía"),
+        TipoServicio(id = 5, nombre = "Laboratorio")
+    )
+
     // ---------- Servicios (Desparasitacion empieza inactivo) ----------
     private val servicios = listOf(
-        Servicio(id = 1, nombre = "Consulta general", descripcion = "Evaluación completa del estado de salud", duracionMin = 30, precio = 60.0, icono = "heart", tipo = TipoServicio.CONSULTA.name),
-        Servicio(id = 2, nombre = "Vacunación", descripcion = "Aplicación de vacunas según su calendario", duracionMin = 30, precio = 45.0, icono = "syringe", tipo = TipoServicio.PREVENCION.name),
-        Servicio(id = 3, nombre = "Baño y corte", descripcion = "Baño, secado y corte de pelo", duracionMin = 60, precio = 50.0, icono = "scissors", tipo = TipoServicio.ESTETICA.name),
-        Servicio(id = 4, nombre = "Desparasitación", descripcion = "Tratamiento antiparasitario interno y externo", duracionMin = 15, precio = 25.0, activo = false, icono = "heart", tipo = TipoServicio.PREVENCION.name)
+        Servicio(id = 1, nombre = "Consulta general", descripcion = "Evaluación completa del estado de salud", duracionMin = 30, precio = 60.0, icono = "heart", tipoId = 1),
+        Servicio(id = 2, nombre = "Vacunación", descripcion = "Aplicación de vacunas según su calendario", duracionMin = 30, precio = 45.0, icono = "syringe", tipoId = 2),
+        Servicio(id = 3, nombre = "Baño y corte", descripcion = "Baño, secado y corte de pelo", duracionMin = 60, precio = 50.0, icono = "scissors", tipoId = 3),
+        Servicio(id = 4, nombre = "Desparasitación", descripcion = "Tratamiento antiparasitario interno y externo", duracionMin = 15, precio = 25.0, activo = false, icono = "heart", tipoId = 2)
     )
 
     // ---------- Usuarios: 2 dueños, 1 veterinario y 1 administrador ----------

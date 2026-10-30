@@ -7,25 +7,28 @@ import androidx.room.RoomDatabase
 import com.tecsup.huellitasvet.data.local.dao.CitaDao
 import com.tecsup.huellitasvet.data.local.dao.MascotaDao
 import com.tecsup.huellitasvet.data.local.dao.ServicioDao
+import com.tecsup.huellitasvet.data.local.dao.TipoServicioDao
 import com.tecsup.huellitasvet.data.local.dao.UsuarioDao
 import com.tecsup.huellitasvet.data.local.dao.VacunaDao
 import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.TipoServicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
 import com.tecsup.huellitasvet.data.local.entity.Vacuna
 
 /**
- * Base de datos Room de la app (archivo huellitasvet.db) con sus 5 tablas.
+ * Base de datos Room de la app (archivo huellitasvet.db) con sus 6 tablas.
  */
 @Database(
-    entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class, Vacuna::class],
-    version = 3,   // v3: tipo en servicios; telefono y distrito en usuarios
+    entities = [TipoServicio::class, Servicio::class, Usuario::class, Mascota::class, Cita::class, Vacuna::class],
+    version = 4,   // v3: telefono y distrito en usuarios; v4: tabla tipos_servicio y tipoId en servicios
     exportSchema = false
 )
 abstract class VetDatabase : RoomDatabase() {
 
     abstract fun servicioDao(): ServicioDao
+    abstract fun tipoServicioDao(): TipoServicioDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun mascotaDao(): MascotaDao
     abstract fun citaDao(): CitaDao

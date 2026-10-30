@@ -34,6 +34,7 @@ object Rutas {
     // ---------- Administrador ----------
     const val ADMIN_USUARIOS = "admin_usuarios"
     const val ADMIN_MASCOTAS = "admin_mascotas"
+    const val ADMIN_TIPOS = "admin_tipos"
     const val ADMIN_CUENTA = "admin_cuenta"
     const val FORMULARIO_VETERINARIO = "formulario_veterinario"
 

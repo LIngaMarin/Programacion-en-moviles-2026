@@ -15,11 +15,11 @@ val AzulContenedor = Color(0xFFDBEAFE)
 val AzulFondo = Color(0xFFF7F9FF)
 val AzulOscuroTexto = Color(0xFF1E3A8A)
 
-// ---------- Administrador (pizarra: el mismo gris azulado de la app) ----------
-val PizarraPrimario = Color(0xFF334155)
-val PizarraContenedor = Color(0xFFE2E8F0)
-val PizarraFondo = Color(0xFFF8FAFC)
-val PizarraOscuroTexto = Color(0xFF0F172A)
+// ---------- Administrador (azul petroleo) ----------
+val PetroleoPrimario = Color(0xFF0E7490)
+val PetroleoContenedor = Color(0xFFCFFAFE)
+val PetroleoFondo = Color(0xFFF5FCFD)
+val PetroleoOscuroTexto = Color(0xFF164E63)
 
 // ---------- Estados de la cita ----------
 val EstadoPendiente = Color(0xFFD97706)
@@ -46,8 +46,8 @@ val VerdeOscuroPrimario = Color(0xFF34D399)
 val VerdeOscuroContenedor = Color(0xFF065F46)
 val AzulOscuroPrimario = Color(0xFF93C5FD)
 val AzulOscuroContenedor = Color(0xFF1E3A8A)
-val PizarraOscuroPrimario = Color(0xFFCBD5E1)
-val PizarraOscuroContenedor = Color(0xFF334155)
+val PetroleoOscuroPrimario = Color(0xFF67E8F9)
+val PetroleoOscuroContenedor = Color(0xFF155E75)
 
 /** Color de cada estado (se usa en EstadoCitaChip y en el grafico de dona). */
 fun colorEstado(estado: EstadoCita): Color = when (estado) {

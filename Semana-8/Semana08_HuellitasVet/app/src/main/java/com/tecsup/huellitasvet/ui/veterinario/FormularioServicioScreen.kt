@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.tecsup.huellitasvet.model.TipoServicio
 import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.VetTextField
@@ -53,10 +52,11 @@ fun FormularioServicioScreen(
     val servicios by vm.servicios.collectAsState()
     val errores by vm.errores.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
+    val tipos by vm.tipos.collectAsState()
     val servicio = servicios.find { it.id == servicioId }
 
     var nombre by rememberSaveable { mutableStateOf("") }
-    var tipo by rememberSaveable { mutableStateOf<TipoServicio?>(null) }
+    var tipoId by rememberSaveable { mutableStateOf<Int?>(null) }
     var duracion by rememberSaveable { mutableStateOf<Int?>(null) }
     var precio by rememberSaveable { mutableStateOf("") }
     var descripcion by rememberSaveable { mutableStateOf("") }
@@ -69,7 +69,7 @@ fun FormularioServicioScreen(
         val s = servicio
         if (s != null && !cargado) {
             nombre = s.nombre
-            tipo = TipoServicio.de(s.tipo)
+            tipoId = s.tipoId
             duracion = s.duracionMin
             precio = s.precio.toString()
             descripcion = s.descripcion
@@ -95,23 +95,26 @@ fun FormularioServicioScreen(
             VetTextField(valor = nombre, onValorCambia = { nombre = it }, etiqueta = "Nombre del servicio", error = errores.nombre)
             Spacer(Modifier.height(12.dp))
 
-            // Tipo de servicio: chips con el mismo estilo de los filtros de la app
+            // Tipo de servicio: chips con los tipos de la BD (mismo estilo de los filtros de la app)
             Text("Tipo de servicio", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            if (tipos.isEmpty()) {
+                Text("Aún no hay tipos creados (los crea el administrador)", style = MaterialTheme.typography.bodySmall, color = colores.onSurfaceVariant)
+            }
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TipoServicio.entries.forEach { opcion ->
-                    val elegido = opcion == tipo
+                tipos.forEach { opcion ->
+                    val elegido = opcion.id == tipoId
                     Surface(
-                        onClick = { tipo = opcion },
+                        onClick = { tipoId = opcion.id },
                         shape = RoundedCornerShape(50),
                         color = if (elegido) colores.primary else colores.surface,
                         contentColor = if (elegido) colores.onPrimary else colores.onSurface,
                         border = if (elegido) null else BorderStroke(1.dp, colores.outlineVariant)
                     ) {
-                        Text(opcion.etiqueta, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                        Text(opcion.nombre, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                     }
                 }
             }
@@ -176,7 +179,7 @@ fun FormularioServicioScreen(
 
             VetButton(
                 texto = "Guardar servicio",
-                onClick = { vm.guardar(servicioId ?: 0, nombre, duracion, precio, descripcion, icono, tipo, activo, onListo = onVolver) }
+                onClick = { vm.guardar(servicioId ?: 0, nombre, duracion, precio, descripcion, icono, tipoId, activo, onListo = onVolver) }
             )
             Spacer(Modifier.height(10.dp))
             VetButton(texto = "Cancelar", onClick = onVolver, contorno = true)

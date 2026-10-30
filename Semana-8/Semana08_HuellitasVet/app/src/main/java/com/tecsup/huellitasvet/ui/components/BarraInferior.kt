@@ -2,6 +2,7 @@ package com.tecsup.huellitasvet.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Group
@@ -39,10 +40,11 @@ val opcionesVeterinario = listOf(
     OpcionBarra("ajustes", "Ajustes", Icons.Filled.Settings)
 )
 
-/** 3 opciones del Administrador. */
+/** 4 opciones del Administrador. */
 val opcionesAdmin = listOf(
     OpcionBarra("admin_usuarios", "Usuarios", Icons.Filled.Group),
     OpcionBarra("admin_mascotas", "Mascotas", Icons.Filled.Pets),
+    OpcionBarra("admin_tipos", "Tipos", Icons.Filled.Category),
     OpcionBarra("admin_cuenta", "Cuenta", Icons.Filled.AccountCircle)
 )
 

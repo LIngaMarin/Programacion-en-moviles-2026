@@ -3,6 +3,8 @@ package com.tecsup.huellitasvet.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Mascota
+import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.TipoServicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
 import com.tecsup.huellitasvet.data.local.relation.MascotaConDueno
 import com.tecsup.huellitasvet.data.repository.VetRepository
@@ -16,8 +18,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** Un tipo de servicio con los servicios que pertenecen a el (para la pantalla Tipos). */
+data class TipoConServicios(
+    val tipo: TipoServicio,
+    val servicios: List<Servicio>
+)
+
 /**
- * Administrador: gestiona usuarios (dueños y veterinarios) y mascotas.
+ * Administrador: gestiona usuarios (dueños y veterinarios), mascotas y tipos de servicio.
  * Reglas: no se elimina al ultimo veterinario; al eliminar un dueño o una mascota
  * tambien se borran sus datos (citas y vacunas) en una transaccion del Repository.
  */
@@ -95,6 +103,57 @@ class AdminViewModel(private val repo: VetRepository) : ViewModel() {
             onListo()
         }
     }
+
+    // ---------- Tipos de servicio ----------
+    val tipos: StateFlow<List<TipoServicio>> = repo.observarTiposServicio()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /** Todos los servicios (para elegir cuales pertenecen a un tipo). */
+    val servicios: StateFlow<List<Servicio>> = repo.observarServicios()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    /** Cada tipo con sus servicios, y aparte los servicios que no tienen tipo. */
+    val tiposConServicios: StateFlow<List<TipoConServicios>> = combine(tipos, servicios) { ts, ss ->
+        ts.map { t -> TipoConServicios(t, ss.filter { it.tipoId == t.id }) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val serviciosSinTipo: StateFlow<List<Servicio>> = combine(tipos, servicios) { _, ss ->
+        ss.filter { it.tipoId == null }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Error del dialogo de crear/editar tipo
+    private val _errorTipo = MutableStateFlow<String?>(null)
+    val errorTipo: StateFlow<String?> = _errorTipo.asStateFlow()
+
+    /** Nuevo (id = 0) o editado (id > 0). Valida: al menos 3 letras y que el nombre no se repita. */
+    fun guardarTipo(id: Int, nombre: String, onListo: () -> Unit) {
+        val limpio = nombre.trim()
+        if (limpio.length < 3) {
+            _errorTipo.value = "El nombre debe tener al menos 3 letras"
+            return
+        }
+        viewModelScope.launch {
+            if (repo.nombreTipoExiste(limpio, id)) {
+                _errorTipo.value = "Ya existe un tipo con ese nombre"
+                return@launch
+            }
+            repo.guardarTipoServicio(TipoServicio(id = id, nombre = limpio))
+            _errorTipo.value = null
+            onListo()
+        }
+    }
+
+    /** Elimina el tipo: sus servicios no se borran, quedan "Sin tipo" (ForeignKey SET_NULL). */
+    fun eliminarTipo(t: TipoServicio) {
+        viewModelScope.launch { repo.eliminarTipoServicio(t) }
+    }
+
+    /** Pone el servicio en un tipo, o lo quita del tipo con tipoId = null. */
+    fun asignarServicio(servicioId: Int, tipoId: Int?) {
+        viewModelScope.launch { repo.asignarTipo(servicioId, tipoId) }
+    }
+
+    fun limpiarErrorTipo() { _errorTipo.value = null }
 
     fun limpiarMensaje() { _mensaje.value = null }
 

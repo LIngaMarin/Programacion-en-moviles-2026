@@ -5,6 +5,7 @@ import com.tecsup.huellitasvet.data.local.VetDatabase
 import com.tecsup.huellitasvet.data.local.entity.Cita
 import com.tecsup.huellitasvet.data.local.entity.Mascota
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.TipoServicio
 import com.tecsup.huellitasvet.data.local.entity.Usuario
 import com.tecsup.huellitasvet.data.local.entity.Vacuna
 import com.tecsup.huellitasvet.data.local.relation.CitaConDetalle
@@ -27,6 +28,7 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     private val mascotaDao = db.mascotaDao()
     private val citaDao = db.citaDao()
     private val vacunaDao = db.vacunaDao()
+    private val tipoServicioDao = db.tipoServicioDao()
 
     // ---------- Usuarios ----------
     override suspend fun login(correo: String, clave: String): Usuario? =
@@ -198,4 +200,19 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
             usuarioDao.eliminar(u)
         }
     }
+
+    // ---------- Tipos de servicio ----------
+    override fun observarTiposServicio(): Flow<List<TipoServicio>> = tipoServicioDao.observarTodos()
+
+    // id = 0 -> nuevo (insert); id > 0 -> editar (update, asi sus servicios no pierden el tipo)
+    override suspend fun guardarTipoServicio(t: TipoServicio) {
+        if (t.id == 0) tipoServicioDao.insertar(t) else tipoServicioDao.actualizar(t)
+    }
+
+    override suspend fun eliminarTipoServicio(t: TipoServicio) = tipoServicioDao.eliminar(t)
+
+    override suspend fun nombreTipoExiste(nombre: String, exceptoId: Int): Boolean =
+        tipoServicioDao.contarPorNombre(nombre, exceptoId) > 0
+
+    override suspend fun asignarTipo(servicioId: Int, tipoId: Int?) = servicioDao.cambiarTipo(servicioId, tipoId)
 }

@@ -77,11 +77,11 @@ private val DuenoClaro = esquemaClaro(VerdePrimario, VerdeContenedor, VerdeOscur
 private val DuenoOscuro = esquemaOscuro(VerdeOscuroPrimario, VerdeOscuroContenedor)
 private val VetClaro = esquemaClaro(AzulPrimario, AzulContenedor, AzulOscuroTexto, AzulFondo)
 private val VetOscuro = esquemaOscuro(AzulOscuroPrimario, AzulOscuroContenedor)
-private val AdminClaro = esquemaClaro(PizarraPrimario, PizarraContenedor, PizarraOscuroTexto, PizarraFondo)
-private val AdminOscuro = esquemaOscuro(PizarraOscuroPrimario, PizarraOscuroContenedor)
+private val AdminClaro = esquemaClaro(PetroleoPrimario, PetroleoContenedor, PetroleoOscuroTexto, PetroleoFondo)
+private val AdminOscuro = esquemaOscuro(PetroleoOscuroPrimario, PetroleoOscuroContenedor)
 
 /**
- * Tema de la app: entrega un ColorScheme segun el perfil (Dueño verde, Veterinario azul, Admin pizarra)
+ * Tema de la app: entrega un ColorScheme segun el perfil (Dueño verde, Veterinario azul, Admin petroleo)
  * y el modo oscuro. En las pantallas se usa MaterialTheme.colorScheme.primary, nunca un color fijo.
  */
 @Composable

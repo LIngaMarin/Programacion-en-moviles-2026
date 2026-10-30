@@ -29,6 +29,7 @@ import com.tecsup.huellitasvet.ui.components.opcionesDueno
 import com.tecsup.huellitasvet.ui.components.opcionesVeterinario
 import com.tecsup.huellitasvet.ui.admin.AdminCuentaScreen
 import com.tecsup.huellitasvet.ui.admin.AdminMascotasScreen
+import com.tecsup.huellitasvet.ui.admin.AdminTiposScreen
 import com.tecsup.huellitasvet.ui.admin.AdminUsuariosScreen
 import com.tecsup.huellitasvet.ui.admin.FormularioVeterinarioScreen
 import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
@@ -66,7 +67,7 @@ import com.tecsup.huellitasvet.viewmodel.vetViewModel
 
 /**
  * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
- * (Dueño en verde, Veterinario en azul y Administrador en pizarra), cada uno con su barra inferior.
+ * (Dueño en verde, Veterinario en azul y Administrador en petroleo), cada uno con su barra inferior.
  */
 @Composable
 fun NavVet(navController: NavHostController = rememberNavController()) {
@@ -388,7 +389,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
         }
 
         // ---------- Grafo del Administrador ----------
-        // Tema pizarra y barra de 3 opciones: Usuarios, Mascotas y Cuenta
+        // Tema petroleo y barra de 4 opciones: Usuarios, Mascotas, Tipos y Cuenta
         navigation(startDestination = Rutas.ADMIN_USUARIOS, route = Rutas.GRAFO_ADMIN) {
             composable(Rutas.ADMIN_USUARIOS) {
                 PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_USUARIOS) {
@@ -403,6 +404,12 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                 PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_MASCOTAS) {
                     val vm = vetViewModel(key = "admin") { app -> AdminViewModel(app.repository) }
                     AdminMascotasScreen(vm = vm)
+                }
+            }
+            composable(Rutas.ADMIN_TIPOS) {
+                PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_TIPOS) {
+                    val vm = vetViewModel(key = "admin-tipos") { app -> AdminViewModel(app.repository) }
+                    AdminTiposScreen(vm = vm)
                 }
             }
             composable(Rutas.ADMIN_CUENTA) {
@@ -481,7 +488,7 @@ private fun PantallaVeterinario(
     }
 }
 
-/** Pantalla del administrador: tema pizarra y, si rutaBarra no es null, la barra inferior de 3 opciones. */
+/** Pantalla del administrador: tema petroleo y, si rutaBarra no es null, la barra inferior de 4 opciones. */
 @Composable
 private fun PantallaAdmin(
     navController: NavHostController,

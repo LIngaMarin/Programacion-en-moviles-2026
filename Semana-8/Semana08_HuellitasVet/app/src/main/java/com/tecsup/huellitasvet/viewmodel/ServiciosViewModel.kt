@@ -3,8 +3,8 @@ package com.tecsup.huellitasvet.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Servicio
+import com.tecsup.huellitasvet.data.local.entity.TipoServicio
 import com.tecsup.huellitasvet.data.repository.VetRepository
-import com.tecsup.huellitasvet.model.TipoServicio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,16 +30,24 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
     val servicios: StateFlow<List<Servicio>> = repo.observarServicios()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Filtro de la lista por tipo de servicio (null = Todos)
-    private val _tipoFiltro = MutableStateFlow<TipoServicio?>(null)
-    val tipoFiltro: StateFlow<TipoServicio?> = _tipoFiltro.asStateFlow()
+    /** Tipos de servicio de la BD (los administra el Administrador). */
+    val tipos: StateFlow<List<TipoServicio>> = repo.observarTiposServicio()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /** Servicios que se muestran en la lista, segun el tipo elegido en los chips. */
-    val serviciosFiltrados: StateFlow<List<Servicio>> = combine(servicios, _tipoFiltro) { lista, tipo ->
-        if (tipo == null) lista else lista.filter { it.tipo == tipo.name }
+    // Filtro de la lista: null = Todos, SIN_TIPO = servicios sin tipo, otro valor = id del tipo
+    private val _tipoFiltro = MutableStateFlow<Int?>(null)
+    val tipoFiltro: StateFlow<Int?> = _tipoFiltro.asStateFlow()
+
+    /** Servicios que se muestran en la lista, segun el chip elegido. */
+    val serviciosFiltrados: StateFlow<List<Servicio>> = combine(servicios, _tipoFiltro) { lista, filtro ->
+        when (filtro) {
+            null -> lista
+            SIN_TIPO -> lista.filter { it.tipoId == null }
+            else -> lista.filter { it.tipoId == filtro }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun elegirTipo(t: TipoServicio?) { _tipoFiltro.value = t }
+    fun elegirTipo(id: Int?) { _tipoFiltro.value = id }
 
     /** Duraciones permitidas en el formulario. */
     val duraciones = listOf(15, 30, 45, 60)
@@ -65,20 +73,21 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
         precioTexto: String,
         descripcion: String,
         icono: String,
-        tipo: TipoServicio?,
+        tipoId: Int?,
         activo: Boolean,
         onListo: () -> Unit
     ) {
         val precio = precioTexto.trim().replace(',', '.').toDoubleOrNull()
         val errores = ErroresServicio(
             nombre = if (nombre.isBlank()) "El nombre es obligatorio" else null,
-            tipo = if (tipo == null) "Elige el tipo de servicio" else null,
+            // Si hay tipos creados, el servicio debe tener uno
+            tipo = if (tipoId == null && tipos.value.isNotEmpty()) "Elige el tipo de servicio" else null,
             duracion = if (duracionMin == null || duracionMin !in duraciones) "Elige la duración" else null,
             precio = if (precio == null || precio <= 0.0) "El precio debe ser mayor que 0" else null
         )
         _errores.value = errores
         if (errores.nombre != null || errores.tipo != null || errores.duracion != null || errores.precio != null ||
-            tipo == null || duracionMin == null || precio == null
+            duracionMin == null || precio == null
         ) return
 
         viewModelScope.launch {
@@ -91,7 +100,7 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
                     precio = precio,
                     activo = activo,
                     icono = icono,
-                    tipo = tipo.name
+                    tipoId = tipoId
                 )
             )
             onListo()
@@ -111,4 +120,9 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
     }
 
     fun limpiarMensaje() { _mensaje.value = null }
+
+    companion object {
+        /** Valor del chip "Sin tipo" (los ids de Room empiezan en 1, asi que 0 nunca es un tipo). */
+        const val SIN_TIPO = 0
+    }
 }

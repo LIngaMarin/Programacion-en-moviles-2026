@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.huellitasvet.data.local.entity.Servicio
-import com.tecsup.huellitasvet.model.TipoServicio
 import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.IconoServicio
 import com.tecsup.huellitasvet.ui.components.soles
@@ -54,10 +53,12 @@ fun ServiciosScreen(
 ) {
     val servicios by vm.serviciosFiltrados.collectAsState()
     val tipoFiltro by vm.tipoFiltro.collectAsState()
+    val tipos by vm.tipos.collectAsState()
     val colores = MaterialTheme.colorScheme
-    // Chips: Todos + un chip por cada tipo de servicio (null = Todos)
-    val filtros = listOf<Pair<String, TipoServicio?>>("Todos" to null) +
-        TipoServicio.entries.map { it.etiqueta to it }
+    // Chips: Todos + un chip por cada tipo de la BD + Sin tipo (el valor es el id del tipo)
+    val filtros = listOf<Pair<String, Int?>>("Todos" to null) +
+        tipos.map { it.nombre to it.id } +
+        listOf("Sin tipo" to ServiciosViewModel.SIN_TIPO)
 
     Scaffold(
         topBar = { AppTopBar("Servicios", onAtras = onAtras) },
@@ -105,6 +106,7 @@ fun ServiciosScreen(
             items(servicios, key = { it.id }) { s ->
                 ServicioItem(
                     s = s,
+                    nombreTipo = tipos.find { it.id == s.tipoId }?.nombre ?: "Sin tipo",
                     onToggle = { vm.alternar(s) },
                     onEditar = { onEditar(s.id) }
                 )
@@ -114,7 +116,7 @@ fun ServiciosScreen(
 }
 
 @Composable
-private fun ServicioItem(s: Servicio, onToggle: () -> Unit, onEditar: () -> Unit) {
+private fun ServicioItem(s: Servicio, nombreTipo: String, onToggle: () -> Unit, onEditar: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -130,7 +132,7 @@ private fun ServicioItem(s: Servicio, onToggle: () -> Unit, onEditar: () -> Unit
             Column(modifier = Modifier.weight(1f)) {
                 Text(s.nombre, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "${TipoServicio.de(s.tipo).etiqueta} · ${s.duracionMin} min · ${soles(s.precio)}",
+                    "$nombreTipo · ${s.duracionMin} min · ${soles(s.precio)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
