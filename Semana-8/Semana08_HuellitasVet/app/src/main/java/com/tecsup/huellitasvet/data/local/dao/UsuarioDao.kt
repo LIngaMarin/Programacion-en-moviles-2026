@@ -1,9 +1,11 @@
 package com.tecsup.huellitasvet.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.tecsup.huellitasvet.data.local.entity.Usuario
+import kotlinx.coroutines.flow.Flow
 
 /** Acceso a la tabla usuarios. */
 @Dao
@@ -36,4 +38,16 @@ interface UsuarioDao {
     // Se usa en DatosIniciales: si es 0, la base esta vacia y se siembran los datos
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
+
+    // ---------- Administrador ----------
+    // Dueños y veterinarios (los administradores no se listan): primero por rol y luego por nombre
+    @Query("SELECT * FROM usuarios WHERE rol != 'ADMINISTRADOR' ORDER BY rol, nombre")
+    fun observarGestionables(): Flow<List<Usuario>>
+
+    // Cuantos usuarios hay de un rol (para no dejar la clinica sin veterinarios)
+    @Query("SELECT COUNT(*) FROM usuarios WHERE rol = :rol")
+    suspend fun contarPorRol(rol: String): Int
+
+    @Delete
+    suspend fun eliminar(u: Usuario)
 }

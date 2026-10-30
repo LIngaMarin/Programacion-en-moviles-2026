@@ -4,16 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.huellitasvet.data.local.entity.Servicio
 import com.tecsup.huellitasvet.data.repository.VetRepository
+import com.tecsup.huellitasvet.model.TipoServicio
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Errores del formulario de servicio, uno por campo. */
 data class ErroresServicio(
     val nombre: String? = null,
+    val tipo: String? = null,
     val duracion: String? = null,
     val precio: String? = null
 )
@@ -26,6 +29,17 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
 
     val servicios: StateFlow<List<Servicio>> = repo.observarServicios()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Filtro de la lista por tipo de servicio (null = Todos)
+    private val _tipoFiltro = MutableStateFlow<TipoServicio?>(null)
+    val tipoFiltro: StateFlow<TipoServicio?> = _tipoFiltro.asStateFlow()
+
+    /** Servicios que se muestran en la lista, segun el tipo elegido en los chips. */
+    val serviciosFiltrados: StateFlow<List<Servicio>> = combine(servicios, _tipoFiltro) { lista, tipo ->
+        if (tipo == null) lista else lista.filter { it.tipo == tipo.name }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun elegirTipo(t: TipoServicio?) { _tipoFiltro.value = t }
 
     /** Duraciones permitidas en el formulario. */
     val duraciones = listOf(15, 30, 45, 60)
@@ -42,7 +56,7 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
 
     /**
      * Nuevo (id = 0) o editado (id > 0).
-     * Valida: nombre obligatorio, duracion 15/30/45/60 y precio mayor que 0.
+     * Valida: nombre obligatorio, tipo elegido, duracion 15/30/45/60 y precio mayor que 0.
      */
     fun guardar(
         id: Int,
@@ -51,18 +65,20 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
         precioTexto: String,
         descripcion: String,
         icono: String,
+        tipo: TipoServicio?,
         activo: Boolean,
         onListo: () -> Unit
     ) {
         val precio = precioTexto.trim().replace(',', '.').toDoubleOrNull()
         val errores = ErroresServicio(
             nombre = if (nombre.isBlank()) "El nombre es obligatorio" else null,
+            tipo = if (tipo == null) "Elige el tipo de servicio" else null,
             duracion = if (duracionMin == null || duracionMin !in duraciones) "Elige la duración" else null,
             precio = if (precio == null || precio <= 0.0) "El precio debe ser mayor que 0" else null
         )
         _errores.value = errores
-        if (errores.nombre != null || errores.duracion != null || errores.precio != null ||
-            duracionMin == null || precio == null
+        if (errores.nombre != null || errores.tipo != null || errores.duracion != null || errores.precio != null ||
+            tipo == null || duracionMin == null || precio == null
         ) return
 
         viewModelScope.launch {
@@ -74,7 +90,8 @@ class ServiciosViewModel(private val repo: VetRepository) : ViewModel() {
                     duracionMin = duracionMin,
                     precio = precio,
                     activo = activo,
-                    icono = icono
+                    icono = icono,
+                    tipo = tipo.name
                 )
             )
             onListo()

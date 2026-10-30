@@ -24,8 +24,13 @@ import androidx.navigation.navArgument
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.ui.components.BarraInferior
 import com.tecsup.huellitasvet.ui.components.OpcionBarra
+import com.tecsup.huellitasvet.ui.components.opcionesAdmin
 import com.tecsup.huellitasvet.ui.components.opcionesDueno
 import com.tecsup.huellitasvet.ui.components.opcionesVeterinario
+import com.tecsup.huellitasvet.ui.admin.AdminCuentaScreen
+import com.tecsup.huellitasvet.ui.admin.AdminMascotasScreen
+import com.tecsup.huellitasvet.ui.admin.AdminUsuariosScreen
+import com.tecsup.huellitasvet.ui.admin.FormularioVeterinarioScreen
 import com.tecsup.huellitasvet.ui.dueno.FichaMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.tecsup.huellitasvet.ui.dueno.InicioScreen
@@ -45,6 +50,7 @@ import com.tecsup.huellitasvet.ui.veterinario.FormularioServicioScreen
 import com.tecsup.huellitasvet.ui.veterinario.PacientesScreen
 import com.tecsup.huellitasvet.ui.veterinario.PanelScreen
 import com.tecsup.huellitasvet.ui.veterinario.ServiciosScreen
+import com.tecsup.huellitasvet.viewmodel.AdminViewModel
 import com.tecsup.huellitasvet.viewmodel.AgendaViewModel
 import com.tecsup.huellitasvet.viewmodel.AtenderCitaViewModel
 import com.tecsup.huellitasvet.viewmodel.InicioViewModel
@@ -60,7 +66,7 @@ import com.tecsup.huellitasvet.viewmodel.vetViewModel
 
 /**
  * Grafo de navegacion de la app: Splash, Login y un grafo por perfil
- * (Dueño en verde y Veterinario en azul), cada uno con su barra inferior.
+ * (Dueño en verde, Veterinario en azul y Administrador en pizarra), cada uno con su barra inferior.
  */
 @Composable
 fun NavVet(navController: NavHostController = rememberNavController()) {
@@ -88,6 +94,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                 when (perfilGuardado) {
                     Rol.CLIENTE.name -> irAGrafo(navController, Rutas.GRAFO_DUENO)
                     Rol.ADMIN.name -> irAGrafo(navController, Rutas.GRAFO_VETERINARIO)
+                    Rol.ADMINISTRADOR.name -> irAGrafo(navController, Rutas.GRAFO_ADMIN)
                 }
             }
             VetTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
@@ -107,7 +114,7 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        // Registro de un dueño nuevo: al terminar entra directo a su Inicio
+        // Registro de un dueño nuevo: al terminar vuelve al login
         composable(Rutas.REGISTRO) {
             RegistroScreen(
                 vm = sesion,
@@ -379,12 +386,53 @@ fun NavVet(navController: NavHostController = rememberNavController()) {
                 }
             }
         }
+
+        // ---------- Grafo del Administrador ----------
+        // Tema pizarra y barra de 3 opciones: Usuarios, Mascotas y Cuenta
+        navigation(startDestination = Rutas.ADMIN_USUARIOS, route = Rutas.GRAFO_ADMIN) {
+            composable(Rutas.ADMIN_USUARIOS) {
+                PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_USUARIOS) {
+                    val vm = vetViewModel(key = "admin") { app -> AdminViewModel(app.repository) }
+                    AdminUsuariosScreen(
+                        vm = vm,
+                        onNuevoVeterinario = { navController.navigate(Rutas.FORMULARIO_VETERINARIO) }
+                    )
+                }
+            }
+            composable(Rutas.ADMIN_MASCOTAS) {
+                PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_MASCOTAS) {
+                    val vm = vetViewModel(key = "admin") { app -> AdminViewModel(app.repository) }
+                    AdminMascotasScreen(vm = vm)
+                }
+            }
+            composable(Rutas.ADMIN_CUENTA) {
+                PantallaAdmin(navController, oscuro, rutaBarra = Rutas.ADMIN_CUENTA) {
+                    AdminCuentaScreen(
+                        nombre = usuario?.nombre ?: "",
+                        correo = usuario?.correo ?: "",
+                        modoOscuro = oscuro,
+                        onModoOscuro = { sesion.cambiarModoOscuro(it) },
+                        onCerrarSesion = cerrarSesion
+                    )
+                }
+            }
+            // Formulario de nuevo veterinario: sin barra inferior
+            composable(Rutas.FORMULARIO_VETERINARIO) {
+                PantallaAdmin(navController, oscuro) {
+                    val vm = vetViewModel(key = "admin-form-vet") { app -> AdminViewModel(app.repository) }
+                    FormularioVeterinarioScreen(vm = vm, onVolver = { navController.popBackStack() })
+                }
+            }
+        }
     }
 }
 
 /** Grafo principal de cada perfil. */
-private fun grafoDe(rol: Rol): String =
-    if (rol == Rol.CLIENTE) Rutas.GRAFO_DUENO else Rutas.GRAFO_VETERINARIO
+private fun grafoDe(rol: Rol): String = when (rol) {
+    Rol.CLIENTE -> Rutas.GRAFO_DUENO
+    Rol.ADMIN -> Rutas.GRAFO_VETERINARIO
+    Rol.ADMINISTRADOR -> Rutas.GRAFO_ADMIN
+}
 
 /** Navega a un destino y limpia toda la pila (popUpTo del grafo raiz): con "atras" no se vuelve. */
 private fun irAGrafo(navController: NavHostController, destino: String) {
@@ -430,6 +478,20 @@ private fun PantallaVeterinario(
     VetTheme(rol = Rol.ADMIN, oscuro = oscuro) {
         if (rutaBarra == null) contenido()
         else ConBarra(navController, opcionesVeterinario, rutaBarra, contenido)
+    }
+}
+
+/** Pantalla del administrador: tema pizarra y, si rutaBarra no es null, la barra inferior de 3 opciones. */
+@Composable
+private fun PantallaAdmin(
+    navController: NavHostController,
+    oscuro: Boolean,
+    rutaBarra: String? = null,
+    contenido: @Composable () -> Unit
+) {
+    VetTheme(rol = Rol.ADMINISTRADOR, oscuro = oscuro) {
+        if (rutaBarra == null) contenido()
+        else ConBarra(navController, opcionesAdmin, rutaBarra, contenido)
     }
 }
 

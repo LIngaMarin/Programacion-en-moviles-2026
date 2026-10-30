@@ -133,7 +133,7 @@ fun LoginScreen(
                             }
                         )
                     }
-                } else {
+                } else if (rol == Rol.ADMIN) {
                     // Aviso del mockup para el veterinario
                     Column(
                         modifier = Modifier
@@ -154,7 +154,7 @@ fun LoginScreen(
     }
 }
 
-/** Selector de dos pestañas: Dueño / Veterinario. */
+/** Selector de pestañas: Dueño / Veterinario / Admin (una por cada Rol). */
 @Composable
 private fun SelectorRol(rol: Rol, onCambiar: (Rol) -> Unit) {
     val colores = MaterialTheme.colorScheme
@@ -178,7 +178,9 @@ private fun SelectorRol(rol: Rol, onCambiar: (Rol) -> Unit) {
                 Text(
                     opcion.etiqueta,
                     color = if (elegido) colores.onPrimary else colores.onSurfaceVariant,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1
                 )
             }
         }

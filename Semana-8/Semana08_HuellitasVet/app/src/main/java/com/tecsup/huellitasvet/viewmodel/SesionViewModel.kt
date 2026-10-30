@@ -6,6 +6,7 @@ import com.tecsup.huellitasvet.data.local.entity.Usuario
 import com.tecsup.huellitasvet.data.prefs.PreferenciasStore
 import com.tecsup.huellitasvet.data.repository.VetRepository
 import com.tecsup.huellitasvet.model.Rol
+import com.tecsup.huellitasvet.model.validarUsuarioNuevo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -69,11 +70,11 @@ class SesionViewModel(
             when {
                 usuario == null ->
                     _error.value = "Correo o contraseña incorrectos"
-                usuario.rol != rolSeleccionado.name ->
-                    _error.value = if (rolSeleccionado == Rol.CLIENTE)
-                        "Esta cuenta es de veterinario: elige la pestaña Veterinario"
-                    else
-                        "Esta cuenta es de dueño: elige la pestaña Dueño"
+                usuario.rol != rolSeleccionado.name -> {
+                    // Con 3 perfiles, el mensaje dice cual es la pestaña correcta
+                    val suRol = Rol.de(usuario.rol)?.etiqueta ?: "otro perfil"
+                    _error.value = "Esta cuenta es de ${suRol.lowercase()}: elige la pestaña $suRol"
+                }
                 else -> {
                     _error.value = null
                     _usuarioActual.value = usuario
@@ -89,23 +90,34 @@ class SesionViewModel(
      * Valida aqui; si todo esta bien lo guarda en Room, inicia su sesion en DataStore
      * y llama a onExito para que la navegacion vaya a su Inicio.
      */
-    fun registrar(nombre: String, correo: String, clave: String, confirmar: String, onExito: () -> Unit) {
+    fun registrar(
+        nombre: String,
+        correo: String,
+        telefono: String,
+        distrito: String,
+        clave: String,
+        confirmar: String,
+        onExito: () -> Unit
+    ) {
         val nombreLimpio = nombre.trim()
         val correoLimpio = correo.trim()
-        _error.value = when {
-            nombreLimpio.isBlank() || correoLimpio.isBlank() || clave.isBlank() -> "Completa todos los campos"
-            !correoLimpio.contains("@") || !correoLimpio.contains(".") -> "Ingresa un correo válido"
-            clave.length < 4 -> "La contraseña debe tener al menos 4 caracteres"
-            clave != confirmar -> "Las contraseñas no coinciden"
-            else -> null
-        }
+        val telefonoLimpio = telefono.trim()
+        val distritoLimpio = distrito.trim()
+        _error.value = validarUsuarioNuevo(nombreLimpio, correoLimpio, clave, confirmar, telefonoLimpio, distritoLimpio)
         if (_error.value != null) return
         viewModelScope.launch {
             if (repo.correoExiste(correoLimpio)) {
                 _error.value = "Ese correo ya está registrado"
                 return@launch
             }
-            val nuevo = Usuario(nombre = nombreLimpio, correo = correoLimpio, clave = clave, rol = Rol.CLIENTE.name)
+            val nuevo = Usuario(
+                nombre = nombreLimpio,
+                correo = correoLimpio,
+                clave = clave,
+                rol = Rol.CLIENTE.name,
+                telefono = telefonoLimpio,
+                distrito = distritoLimpio
+            )
             repo.registrarUsuario(nuevo)
             _aviso.value = "Cuenta creada. Inicia sesión con tu correo y contraseña"
             onExito()

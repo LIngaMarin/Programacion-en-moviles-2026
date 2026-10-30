@@ -171,4 +171,31 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override fun observarIngresosDesde(fechaInicio: String): Flow<Double> =
         citaDao.ingresosDesde(fechaInicio)
+
+    // ---------- Administrador ----------
+    override fun observarUsuariosGestionables(): Flow<List<Usuario>> = usuarioDao.observarGestionables()
+
+    override suspend fun contarUsuariosPorRol(rol: Rol): Int = usuarioDao.contarPorRol(rol.name)
+
+    // Transaccion: primero los "hijos" (citas y vacunas) y al final la mascota, por las claves foraneas
+    override suspend fun eliminarMascotaConDatos(m: Mascota) {
+        db.withTransaction {
+            citaDao.eliminarPorMascota(m.id)
+            vacunaDao.eliminarPorMascota(m.id)
+            mascotaDao.eliminar(m)
+        }
+    }
+
+    // Transaccion: las mascotas del dueño (con sus citas y vacunas) y al final el usuario.
+    // Si algo falla, no se borra nada.
+    override suspend fun eliminarUsuarioConDatos(u: Usuario) {
+        db.withTransaction {
+            mascotaDao.obtenerPorDueno(u.id).forEach { m ->
+                citaDao.eliminarPorMascota(m.id)
+                vacunaDao.eliminarPorMascota(m.id)
+                mascotaDao.eliminar(m)
+            }
+            usuarioDao.eliminar(u)
+        }
+    }
 }

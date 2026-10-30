@@ -108,4 +108,8 @@ interface CitaDao {
     // Suma del precio de las citas ATENDIDAS desde una fecha (0.0 si no hay ninguna)
     @Query("SELECT COALESCE(SUM(precio), 0.0) FROM citas WHERE estado = 'ATENDIDA' AND fecha >= :fechaInicio")
     fun ingresosDesde(fechaInicio: String): Flow<Double>
+
+    // Administrador: borra las citas de una mascota antes de eliminarla (clave foranea)
+    @Query("DELETE FROM citas WHERE mascotaId = :mascotaId")
+    suspend fun eliminarPorMascota(mascotaId: Int)
 }

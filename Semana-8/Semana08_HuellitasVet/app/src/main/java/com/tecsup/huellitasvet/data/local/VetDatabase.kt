@@ -20,7 +20,7 @@ import com.tecsup.huellitasvet.data.local.entity.Vacuna
  */
 @Database(
     entities = [Servicio::class, Usuario::class, Mascota::class, Cita::class, Vacuna::class],
-    version = 2,
+    version = 3,   // v3: tipo en servicios; telefono y distrito en usuarios
     exportSchema = false
 )
 abstract class VetDatabase : RoomDatabase() {

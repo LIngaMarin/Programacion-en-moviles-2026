@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tecsup.huellitasvet.model.TipoServicio
 import com.tecsup.huellitasvet.ui.components.AppTopBar
 import com.tecsup.huellitasvet.ui.components.VetButton
 import com.tecsup.huellitasvet.ui.components.VetTextField
@@ -40,6 +43,7 @@ import com.tecsup.huellitasvet.ui.components.iconoDeServicio
 import com.tecsup.huellitasvet.viewmodel.ServiciosViewModel
 
 /** Formulario para crear (servicioId = null) o editar un servicio. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FormularioServicioScreen(
     vm: ServiciosViewModel,
@@ -52,6 +56,7 @@ fun FormularioServicioScreen(
     val servicio = servicios.find { it.id == servicioId }
 
     var nombre by rememberSaveable { mutableStateOf("") }
+    var tipo by rememberSaveable { mutableStateOf<TipoServicio?>(null) }
     var duracion by rememberSaveable { mutableStateOf<Int?>(null) }
     var precio by rememberSaveable { mutableStateOf("") }
     var descripcion by rememberSaveable { mutableStateOf("") }
@@ -64,6 +69,7 @@ fun FormularioServicioScreen(
         val s = servicio
         if (s != null && !cargado) {
             nombre = s.nombre
+            tipo = TipoServicio.de(s.tipo)
             duracion = s.duracionMin
             precio = s.precio.toString()
             descripcion = s.descripcion
@@ -87,6 +93,29 @@ fun FormularioServicioScreen(
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             VetTextField(valor = nombre, onValorCambia = { nombre = it }, etiqueta = "Nombre del servicio", error = errores.nombre)
+            Spacer(Modifier.height(12.dp))
+
+            // Tipo de servicio: chips con el mismo estilo de los filtros de la app
+            Text("Tipo de servicio", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TipoServicio.entries.forEach { opcion ->
+                    val elegido = opcion == tipo
+                    Surface(
+                        onClick = { tipo = opcion },
+                        shape = RoundedCornerShape(50),
+                        color = if (elegido) colores.primary else colores.surface,
+                        contentColor = if (elegido) colores.onPrimary else colores.onSurface,
+                        border = if (elegido) null else BorderStroke(1.dp, colores.outlineVariant)
+                    ) {
+                        Text(opcion.etiqueta, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    }
+                }
+            }
+            errores.tipo?.let { Text(it, color = colores.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp)) }
             Spacer(Modifier.height(12.dp))
 
             Text("Duración", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
@@ -147,7 +176,7 @@ fun FormularioServicioScreen(
 
             VetButton(
                 texto = "Guardar servicio",
-                onClick = { vm.guardar(servicioId ?: 0, nombre, duracion, precio, descripcion, icono, activo, onListo = onVolver) }
+                onClick = { vm.guardar(servicioId ?: 0, nombre, duracion, precio, descripcion, icono, tipo, activo, onListo = onVolver) }
             )
             Spacer(Modifier.height(10.dp))
             VetButton(texto = "Cancelar", onClick = onVolver, contorno = true)

@@ -9,6 +9,7 @@ object Rutas {
     // ---------- Grafos (uno por perfil) ----------
     const val GRAFO_DUENO = "grafo_dueno"
     const val GRAFO_VETERINARIO = "grafo_veterinario"
+    const val GRAFO_ADMIN = "grafo_admin"
 
     // ---------- Dueño ----------
     const val INICIO = "inicio"
@@ -29,6 +30,12 @@ object Rutas {
     const val SERVICIOS = "servicios"
     const val FORMULARIO_SERVICIO = "formulario_servicio?servicioId={servicioId}"
     const val AJUSTES = "ajustes"
+
+    // ---------- Administrador ----------
+    const val ADMIN_USUARIOS = "admin_usuarios"
+    const val ADMIN_MASCOTAS = "admin_mascotas"
+    const val ADMIN_CUENTA = "admin_cuenta"
+    const val FORMULARIO_VETERINARIO = "formulario_veterinario"
 
     // ---------- Funciones para navegar con parametros ----------
     // id opcional: sin id = crear nuevo, con id = editar

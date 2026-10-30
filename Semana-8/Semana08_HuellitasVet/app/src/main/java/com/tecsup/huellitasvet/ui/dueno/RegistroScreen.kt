@@ -13,8 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,6 +50,8 @@ fun RegistroScreen(
 ) {
     var nombre by rememberSaveable { mutableStateOf("") }
     var correo by rememberSaveable { mutableStateOf("") }
+    var telefono by rememberSaveable { mutableStateOf("") }
+    var distrito by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
     var confirmar by rememberSaveable { mutableStateOf("") }
     val error by vm.error.collectAsState()
@@ -82,6 +86,23 @@ fun RegistroScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 VetTextField(
+                    valor = telefono,
+                    // Solo deja escribir numeros, hasta 9
+                    onValorCambia = { nuevo -> telefono = nuevo.filter { it.isDigit() }.take(9) },
+                    etiqueta = "Teléfono",
+                    icono = Icons.Filled.Phone,
+                    teclado = KeyboardType.Phone,
+                    placeholder = "9XXXXXXXX"
+                )
+                Spacer(Modifier.height(12.dp))
+                VetTextField(
+                    valor = distrito,
+                    onValorCambia = { distrito = it },
+                    etiqueta = "Distrito",
+                    icono = Icons.Filled.LocationOn
+                )
+                Spacer(Modifier.height(12.dp))
+                VetTextField(
                     valor = clave,
                     onValorCambia = { clave = it },
                     etiqueta = "Contraseña",
@@ -106,7 +127,7 @@ fun RegistroScreen(
                 Spacer(Modifier.height(20.dp))
                 VetButton(
                     texto = "Crear cuenta",
-                    onClick = { vm.registrar(nombre, correo, clave, confirmar, onRegistrado) }
+                    onClick = { vm.registrar(nombre, correo, telefono, distrito, clave, confirmar, onRegistrado) }
                 )
                 Spacer(Modifier.height(16.dp))
 

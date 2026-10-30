@@ -49,4 +49,8 @@ interface MascotaDao {
     // Si es mayor que 0, la mascota tiene citas y no se puede eliminar
     @Query("SELECT COUNT(*) FROM citas WHERE mascotaId = :mascotaId")
     suspend fun contarCitas(mascotaId: Int): Int
+
+    // Administrador: las mascotas de un dueño, para eliminarlas junto con el
+    @Query("SELECT * FROM mascotas WHERE duenoId = :duenoId")
+    suspend fun obtenerPorDueno(duenoId: Int): List<Mascota>
 }

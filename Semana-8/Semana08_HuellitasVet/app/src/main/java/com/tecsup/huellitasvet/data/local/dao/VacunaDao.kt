@@ -25,4 +25,8 @@ interface VacunaDao {
 
     @Delete
     suspend fun eliminar(v: Vacuna)
+
+    // Administrador: borra las vacunas de una mascota antes de eliminarla (clave foranea)
+    @Query("DELETE FROM vacunas WHERE mascotaId = :mascotaId")
+    suspend fun eliminarPorMascota(mascotaId: Int)
 }

@@ -9,6 +9,7 @@ import com.tecsup.huellitasvet.model.Especie
 import com.tecsup.huellitasvet.model.EstadoCita
 import com.tecsup.huellitasvet.model.Rol
 import com.tecsup.huellitasvet.model.Sexo
+import com.tecsup.huellitasvet.model.TipoServicio
 import java.time.LocalDate
 
 /**
@@ -31,17 +32,22 @@ object DatosIniciales {
 
     // ---------- Servicios (Desparasitacion empieza inactivo) ----------
     private val servicios = listOf(
-        Servicio(id = 1, nombre = "Consulta general", descripcion = "Evaluación completa del estado de salud", duracionMin = 30, precio = 60.0, icono = "heart"),
-        Servicio(id = 2, nombre = "Vacunación", descripcion = "Aplicación de vacunas según su calendario", duracionMin = 30, precio = 45.0, icono = "syringe"),
-        Servicio(id = 3, nombre = "Baño y corte", descripcion = "Baño, secado y corte de pelo", duracionMin = 60, precio = 50.0, icono = "scissors"),
-        Servicio(id = 4, nombre = "Desparasitación", descripcion = "Tratamiento antiparasitario interno y externo", duracionMin = 15, precio = 25.0, activo = false, icono = "heart")
+        Servicio(id = 1, nombre = "Consulta general", descripcion = "Evaluación completa del estado de salud", duracionMin = 30, precio = 60.0, icono = "heart", tipo = TipoServicio.CONSULTA.name),
+        Servicio(id = 2, nombre = "Vacunación", descripcion = "Aplicación de vacunas según su calendario", duracionMin = 30, precio = 45.0, icono = "syringe", tipo = TipoServicio.PREVENCION.name),
+        Servicio(id = 3, nombre = "Baño y corte", descripcion = "Baño, secado y corte de pelo", duracionMin = 60, precio = 50.0, icono = "scissors", tipo = TipoServicio.ESTETICA.name),
+        Servicio(id = 4, nombre = "Desparasitación", descripcion = "Tratamiento antiparasitario interno y externo", duracionMin = 15, precio = 25.0, activo = false, icono = "heart", tipo = TipoServicio.PREVENCION.name)
     )
 
-    // ---------- Usuarios: 2 dueños y 1 veterinario ----------
+    // ---------- Usuarios: 2 dueños, 1 veterinario y 1 administrador ----------
     private val usuarios = listOf(
-        Usuario(id = 1, nombre = "Ana García", correo = "ana@correo.test", clave = "1234", rol = Rol.CLIENTE.name),
-        Usuario(id = 2, nombre = "Luis Torres", correo = "luis@correo.test", clave = "1234", rol = Rol.CLIENTE.name),
-        Usuario(id = 3, nombre = "Dra. Rojas", correo = "vet@huellitas.test", clave = "admin", rol = Rol.ADMIN.name)
+        Usuario(id = 1, nombre = "Ana García", correo = "ana@correo.test", clave = "1234", rol = Rol.CLIENTE.name,
+            telefono = "987654321", distrito = "Miraflores"),
+        Usuario(id = 2, nombre = "Luis Torres", correo = "luis@correo.test", clave = "1234", rol = Rol.CLIENTE.name,
+            telefono = "912345678", distrito = "Surco"),
+        Usuario(id = 3, nombre = "Dra. Rojas", correo = "vet@huellitas.test", clave = "admin", rol = Rol.ADMIN.name,
+            telefono = "998877665", distrito = "San Isidro"),
+        Usuario(id = 4, nombre = "Administrador", correo = "admin@huellitas.test", clave = "admin", rol = Rol.ADMINISTRADOR.name,
+            telefono = "900111222", distrito = "Lima")
     )
 
     // ---------- Mascotas: Luna y Max son de Ana; Rocky y Michi de Luis ----------
