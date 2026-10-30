@@ -357,6 +357,8 @@ private fun irAGrafo(navController: NavHostController, destino: String) {
 
 /** Cambia de opcion de la barra inferior sin apilar pantallas repetidas. */
 private fun irATab(navController: NavHostController, ruta: String, rutaInicio: String) {
+    // Si va a la primera pestaña (Inicio o Panel), solo regresa a ella quitando lo que tiene encima
+    if (ruta == rutaInicio && navController.popBackStack(rutaInicio, inclusive = false)) return
     navController.navigate(ruta) {
         popUpTo(rutaInicio) { saveState = true }
         launchSingleTop = true
