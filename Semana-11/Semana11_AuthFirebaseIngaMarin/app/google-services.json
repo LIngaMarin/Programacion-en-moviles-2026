@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "121440902597",
+    "project_id": "authfirebaseingamarin",
+    "storage_bucket": "authfirebaseingamarin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121440902597:android:397bb131dfc9ea8cc8ffac",
+        "android_client_info": {
+          "package_name": "com.tecsup.authfirebaseingamarin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDliwoiZReWrLryjTC1traP0K6MDpG0ZeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
